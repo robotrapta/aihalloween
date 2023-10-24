@@ -6,6 +6,7 @@ from framegrab import FrameGrabber, MotionDetector
 from groundlight import Groundlight
 from imgcat import imgcat
 import numpy as np
+from PIL import Image
 
 @lru_cache(maxsize=1)
 def init_gl() -> tuple[Groundlight, "Detector"]:
@@ -18,11 +19,18 @@ def init_gl() -> tuple[Groundlight, "Detector"]:
     return gl, detector
 
 
+@lru_cache(maxsize=1)
+def clown_image() -> Image.Image:
+    clown_image = Image.open("./media/scary-clown.jpg")
+    return clown_image
+
+
 def do_scream():
+    imgcat(clown_image())
     print(f"AHHH!!!!")
 
 
-def process_image(frame: np.ndarray):
+def process_image(frame: np.ndarray) -> bool:
     gl, detector = init_gl()
     start_time = time.monotonic()
     iq = gl.ask_ml(detector, frame)
@@ -30,6 +38,8 @@ def process_image(frame: np.ndarray):
     print(f"Got {iq.result} after {elased:.2f}s")
     if iq.result.label == "YES":
         do_scream()
+        return True
+    return False
 
 def mainloop():
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
