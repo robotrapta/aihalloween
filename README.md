@@ -16,13 +16,22 @@ poetry install
 
 ### Camera setup
 
-Check the default camera configuration.
+Create a default camera config and confirm that it works.
 
 ```
-framegrab preview ./camera.yaml
+poetry run framegrab autodiscover > camera.yaml
+poetry run framegrab preview ./camera.yaml
 ```
 
-If that doesn't work, try `framegrab autodiscover` to find the camera and update `camera.yaml`
+### Troubleshooting
+
+If poetry is getting stuck, try
+
+```
+export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+```
+
+([ref](https://github.com/python-poetry/poetry/issues/1917))
 
 ## Running
 
