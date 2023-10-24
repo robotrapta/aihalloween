@@ -1,15 +1,42 @@
 #!/usr/bin/env -S poetry run python
+from functools import lru_cache
 import time
 
 from framegrab import FrameGrabber, MotionDetector
+from groundlight import Groundlight
 from imgcat import imgcat
+import numpy as np
 
+@lru_cache(maxsize=1)
+def init_gl() -> tuple[Groundlight, "Detector"]:
+    gl = Groundlight()
+    detector = gl.get_or_create_detector(
+                name="tongue-sticking",
+                query="Is there a person facing the camera and sticking out their tongue?",
+                confidence_threshold=0.75,
+            )
+    return gl, detector
+
+
+def do_scream():
+    print(f"AHHH!!!!")
+
+
+def process_image(frame: np.ndarray):
+    gl, detector = init_gl()
+    start_time = time.monotonic()
+    iq = gl.ask_ml(detector, frame)
+    elased = time.monotonic() - start_time
+    print(f"Got {iq.result} after {elased:.2f}s")
+    if iq.result.label == "YES":
+        do_scream()
 
 def mainloop():
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
     motdet = MotionDetector()
 
     ema_fps = None
+    last_fps_message = 0
     while True:
         start_time = time.monotonic()
         frame = grabber.grab()
@@ -25,9 +52,12 @@ def mainloop():
         else:
             ema_fps = 0.9 * ema_fps + 0.1 * current_fps
         if motion:
-            print(f"Motion detected!")
-            imgcat(frame)
-        print(f"fps={ema_fps:.2f}")
+            # reverse BGR for preview
+            imgcat(frame[:, :, ::-1])
+            process_image(frame)
+        if time.monotonic() - last_fps_message > 1:
+            last_fps_message = time.monotonic()
+            print(f"fps={ema_fps:.2f}")
 
 
 if __name__ == "__main__":

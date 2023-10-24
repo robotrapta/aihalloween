@@ -47,3 +47,7 @@ Then run
 ```bash
 poetry run python ./screamer.py
 ```
+
+### What to do?
+
+Try looking at the camera and sticking out your tongue.
