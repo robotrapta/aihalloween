@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "facescream"
 version = "0.1.0"
-description = ""
+description = "A spooky Halloween vision application"
 authors = ["Leo Dirac <leo@groundlight.ai>"]
 license = "MIT"
 readme = "README.md"
@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 groundlight = "^0.12.1"
-
+framegrab = { git = "https://github.com/groundlight/framegrab.git", rev = "convenience-yaml-install" }
 
 [build-system]
 requires = ["poetry-core"]

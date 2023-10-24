@@ -35,3 +35,15 @@ export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
 
 ## Running
 
+Get a [Groundlight API token](https://code.groundlight.ai/python-sdk/docs/getting-started/api-tokens)
+and set it as an environment variable like
+
+```bash
+export GROUNDLIGHT_API_TOKEN=api_2Q...
+```
+
+Then run
+
+```bash
+poetry run python ./screamer.py
+```
