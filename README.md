@@ -1,12 +1,20 @@
 # FaceScream - a spooky halloween vision project
 
-## Setup
+## System Setup
 
-Install poetry
+Install poetry if you haven't:
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
+export PATH="/home/ubuntu/.local/bin:$PATH"
 ```
+
+And if you're on Ubuntu, make sure you have `libGL.so` the right prerequisites installed:
+
+```bash
+sudo apt install libgl1-mesa-glx ffmpeg
+```
+
 
 Install dependencies
 

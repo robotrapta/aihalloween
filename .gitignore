@@ -1,5 +1,5 @@
-
 camera.yaml
+/audio
 
 *.swp
 __pycache__

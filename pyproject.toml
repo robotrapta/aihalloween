@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.8"
 groundlight = "^0.12.1"
 framegrab = "^v0.4.2"
+gtts = "^2.4.0"
 
 [build-system]
 requires = ["poetry-core"]
