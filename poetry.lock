@@ -169,22 +169,18 @@ name = "framegrab"
 version = "0.4.2"
 description = "Easily grab frames from cameras or streams"
 optional = false
-python-versions = "^3.7"
-files = []
-develop = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "framegrab-0.4.2-py3-none-any.whl", hash = "sha256:49c63d730d9bf8a113bf08be7f14b02564f6b267ccb559af45677d40b18f746a"},
+    {file = "framegrab-0.4.2.tar.gz", hash = "sha256:d17e1a42408a2f4e65852fd84698ccb905428cac1b6bbf31a805954c5e8638eb"},
+]
 
 [package.dependencies]
-ascii-magic = "^2.3.0"
-click = "^8.1.6"
-imgcat = "^0.5.0"
-opencv-python = "^4.4.0.46"
-pyyaml = "^6.0.1"
-
-[package.source]
-type = "git"
-url = "https://github.com/groundlight/framegrab.git"
-reference = "convenience-yaml-install"
-resolved_reference = "afa040e6fdf44a3cda2ea054b3e9dde007469dde"
+ascii-magic = ">=2.3.0,<3.0.0"
+click = ">=8.1.6,<9.0.0"
+imgcat = ">=0.5.0,<0.6.0"
+opencv-python = ">=4.4.0.46,<5.0.0.0"
+pyyaml = ">=6.0.1,<7.0.0"
 
 [[package]]
 name = "frozendict"
@@ -787,4 +783,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "6fbf55509467c7147c79485060b6d675af1ae77c8e94b39a6adfbd60127b3568"
+content-hash = "cb5ad6c24b3e150a628f15f39442522a0a461767a8642c422c9cf6ec8f916dae"

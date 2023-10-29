@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 groundlight = "^0.12.1"
-framegrab = { git = "https://github.com/groundlight/framegrab.git", rev = "convenience-yaml-install" }
+framegrab = "^v0.4.2"
 
 [build-system]
 requires = ["poetry-core"]
