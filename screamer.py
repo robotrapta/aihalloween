@@ -1,5 +1,6 @@
 #!/usr/bin/env -S poetry run python
 from functools import lru_cache
+import random
 import time
 
 from framegrab import FrameGrabber, MotionDetector
@@ -29,8 +30,15 @@ def clown_image() -> Image.Image:
 
 
 def do_scream():
-    print("SCREAMING")
-    audiofile = make_mp3_text("I will rip that tongue right out of you.")
+    print("\n\n\nSCREAMING!!!\n\n\n")
+    text_choices = [
+        "I will rip that tongue right out of you.",
+        "Hey that's rude!",
+        "Cut it out, or I'll cut that tongue out of you.",
+        "Are you trying to make me angry?",
+    ]
+    chosen_text = random.choice(text_choices)
+    audiofile = make_mp3_text(chosen_text)
     play_mp3(audiofile)
 
 
