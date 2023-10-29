@@ -9,7 +9,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 groundlight = "^0.12.1"
-framegrab = "^v0.4.2"
+framegrab = { path = "../framegrab", develop = true }
+
 gtts = "^2.4.0"
 
 [build-system]

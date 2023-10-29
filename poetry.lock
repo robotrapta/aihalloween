@@ -169,18 +169,20 @@ name = "framegrab"
 version = "0.4.2"
 description = "Easily grab frames from cameras or streams"
 optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "framegrab-0.4.2-py3-none-any.whl", hash = "sha256:49c63d730d9bf8a113bf08be7f14b02564f6b267ccb559af45677d40b18f746a"},
-    {file = "framegrab-0.4.2.tar.gz", hash = "sha256:d17e1a42408a2f4e65852fd84698ccb905428cac1b6bbf31a805954c5e8638eb"},
-]
+python-versions = "^3.7"
+files = []
+develop = true
 
 [package.dependencies]
-ascii-magic = ">=2.3.0,<3.0.0"
-click = ">=8.1.6,<9.0.0"
-imgcat = ">=0.5.0,<0.6.0"
-opencv-python = ">=4.4.0.46,<5.0.0.0"
-pyyaml = ">=6.0.1,<7.0.0"
+ascii-magic = "^2.3.0"
+click = "^8.1.6"
+imgcat = "^0.5.0"
+opencv-python = "^4.4.0.46"
+pyyaml = "^6.0.1"
+
+[package.source]
+type = "directory"
+url = "../framegrab"
 
 [[package]]
 name = "frozendict"
@@ -802,4 +804,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "0089986f63d8836b54b3790f8372b9effce91ff5ec7f62a86da1d442c051345f"
+content-hash = "26557d2e452af4f4669b2a6c29949b71e1227619b042db979f0654b39a74f0b3"

@@ -8,6 +8,9 @@ from imgcat import imgcat
 import numpy as np
 from PIL import Image
 
+from simple_tts import make_mp3_text, play_mp3
+
+
 @lru_cache(maxsize=1)
 def init_gl() -> tuple[Groundlight, "Detector"]:
     gl = Groundlight()
@@ -16,6 +19,7 @@ def init_gl() -> tuple[Groundlight, "Detector"]:
                 query="Is there a person facing the camera and sticking out their tongue?",
                 confidence_threshold=0.75,
             )
+    print(f"Using detector {detector}")
     return gl, detector
 
 
@@ -26,8 +30,9 @@ def clown_image() -> Image.Image:
 
 
 def do_scream():
-    imgcat(clown_image())
-    print(f"AHHH!!!!")
+    print("SCREAMING")
+    audiofile = make_mp3_text("I will rip that tongue right out of you.")
+    play_mp3(audiofile)
 
 
 def process_image(frame: np.ndarray) -> bool:
