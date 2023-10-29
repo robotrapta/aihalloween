@@ -17,7 +17,6 @@ def init_gl() -> tuple[Groundlight, "Detector"]:
     detector = gl.get_or_create_detector(
                 name="tongue-sticking",
                 query="Is there a person facing the camera and sticking out their tongue?",
-                confidence_threshold=0.75,
             )
     print(f"Using detector {detector}")
     return gl, detector
