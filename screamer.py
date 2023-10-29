@@ -40,7 +40,7 @@ def process_image(frame: np.ndarray) -> bool:
     start_time = time.monotonic()
     iq = gl.ask_ml(detector, frame)
     elased = time.monotonic() - start_time
-    print(f"Got {iq.result} after {elased:.2f}s")
+    print(f"Got {iq.result} after {elased:.2f}s on image of size {frame.shape}")
     if iq.result.label == "YES":
         do_scream()
         return True
