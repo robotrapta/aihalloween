@@ -31,6 +31,14 @@ poetry run framegrab autodiscover > camera.yaml
 poetry run framegrab preview ./camera.yaml
 ```
 
+### Running automatically
+
+Add this to your crontab:
+
+```
+@reboot /home/ubuntu/hdev/facescreamer/onboot.sh
+```
+
 ### Troubleshooting
 
 If poetry is getting stuck, try
