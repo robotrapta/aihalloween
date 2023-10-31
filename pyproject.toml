@@ -13,6 +13,8 @@ framegrab = { path = "../framegrab", develop = true }
 
 gtts = "^2.4.0"
 typer = "^0.9.0"
+pyserial = {git = "https://github.com/pyserial/pyserial"}
+dmxenttecpro = {git = "https://github.com/SavinaRoja/DMXEnttecPro.git"}
 
 [build-system]
 requires = ["poetry-core"]

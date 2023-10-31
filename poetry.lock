@@ -165,6 +165,24 @@ files = [
 ]
 
 [[package]]
+name = "DMXEnttecPro"
+version = "0.4"
+description = ""
+optional = false
+python-versions = "*"
+files = []
+develop = false
+
+[package.dependencies]
+pyserial = "*"
+
+[package.source]
+type = "git"
+url = "https://github.com/SavinaRoja/DMXEnttecPro.git"
+reference = "HEAD"
+resolved_reference = "6eb908a70c0e0f7cf32fdab028eff4dc00ec28a6"
+
+[[package]]
 name = "framegrab"
 version = "0.4.2"
 description = "Easily grab frames from cameras or streams"
@@ -649,6 +667,24 @@ files = [
 typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
+name = "pyserial"
+version = "3.5"
+description = "Python Serial Port Extension"
+optional = false
+python-versions = "*"
+files = []
+develop = false
+
+[package.extras]
+cp2110 = ["hidapi"]
+
+[package.source]
+type = "git"
+url = "https://github.com/pyserial/pyserial"
+reference = "HEAD"
+resolved_reference = "7aeea35429d15f3eefed10bbb659674638903e3a"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -804,4 +840,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "38a5bc18d811402ad87c45e6de89d8bc2177da19d920e2a1614ab299466291fd"
+content-hash = "49dbd56d4c186a0dff90d1a61678dab87bf56a5ef75ae4e57a529f419a35b64e"
