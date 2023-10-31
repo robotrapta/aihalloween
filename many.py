@@ -40,13 +40,13 @@ class VisualHalloween():
     def tts_scream(self):
         text_choices = self.tts_choices
         chosen_text = random.choice(text_choices)
-        print("\n\n\nSCREAMING!!!  {chosen_text}\n\n\n")
+        print(f"\n\n\nSCREAMING!!!  {chosen_text}\n\n\n")
         audiofile = make_mp3_text(chosen_text)
         play_mp3(audiofile)
 
     def pick_and_play_soundfile(self, soundfile_dir:str):
         soundfiles = os.listdir(soundfile_dir)
-        soundfile = random.choice(soundfiles)
+        soundfile = soundfile_dir + "/" + random.choice(soundfiles)
         print(f"Playing {soundfile}")
         play_mp3(soundfile)
 
@@ -80,19 +80,22 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             "woof woof bark woof",
             "Aren't you worried a monster might jump out of the bushes and grab your dog?"
         ]),
-        VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
+        VisualHalloween("baby-stroller", "Is there a baby stroller in view?", 
+                        soundfile_dir="media/baby"),
         #VisualHalloween("baby-stroller", "Is there a baby stroller in view?", messages=[
             #"oooh that's a cute baby. she looks delicious.",
             #"don't you think it's dangerous taking a baby out on halloween?"
             #"I like to eat babies",
             #"Aren't you worried a monster might jump out of the bushes and grab your baby?"
         #]),
-        VisualHalloween("tongue-sticking","Is there a person facing the camera and sticking out their tongue?", messages=[
-            "I will rip that tongue right out of you.",
-            "Hey that's rude!",
-            "Cut it out, or I'll cut that tongue out of you.",
-            "Are you trying to make me angry?",
-        ]),
+        VisualHalloween("tongue-sticking","Is there a person facing the camera and sticking out their tongue?", 
+                        soundfile_dir="media/baby"),
+                        #messages=[
+            #"I will rip that tongue right out of you.",
+            #"Hey that's rude!",
+            #"Cut it out, or I'll cut that tongue out of you.",
+            #"Are you trying to make me angry?",
+        #]),
     ]
 
     ema_fps = None
