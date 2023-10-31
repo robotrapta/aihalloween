@@ -89,6 +89,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     last_fps_message = 0
     while True:
         start_time = time.monotonic()
+
+        # Get the image
         frame = grabber.grab()
         if frame is None:
             print("No frame captured!")
@@ -96,13 +98,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         # invert the frame by 180 degrees
         frame = np.rot90(frame, 2)
 
+        # Process the image
         motion = motdet.motion_detected(frame)
-        elapsed = time.monotonic() - start_time
-        current_fps = 1.0 / elapsed
-        if ema_fps is None:
-            ema_fps = current_fps
-        else:
-            ema_fps = 0.9 * ema_fps + 0.1 * current_fps
         if motion:
             # reverse BGR for preview
             imgcat(frame[:, :, ::-1])
@@ -110,6 +107,14 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                 screamer.process_image(frame)
             # save the file
             cv2.imwrite("latest.jpg", frame)
+        
+        # Timing summary.
+        elapsed = time.monotonic() - start_time
+        current_fps = 1.0 / elapsed
+        if ema_fps is None:
+            ema_fps = current_fps
+        else:
+            ema_fps = 0.9 * ema_fps + 0.1 * current_fps
         if time.monotonic() - last_fps_message > 1:
             last_fps_message = time.monotonic()
             print(f"fps={ema_fps:.2f}")
