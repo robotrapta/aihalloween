@@ -12,6 +12,7 @@ groundlight = "^0.12.1"
 framegrab = { path = "../framegrab", develop = true }
 
 gtts = "^2.4.0"
+typer = "^0.9.0"
 
 [build-system]
 requires = ["poetry-core"]

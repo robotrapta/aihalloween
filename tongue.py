@@ -23,12 +23,6 @@ def init_gl() -> tuple[Groundlight, "Detector"]:
     return gl, detector
 
 
-@lru_cache(maxsize=1)
-def clown_image() -> Image.Image:
-    clown_image = Image.open("./media/scary-clown.jpg")
-    return clown_image
-
-
 def do_scream():
     print("\n\n\nSCREAMING!!!\n\n\n")
     text_choices = [
