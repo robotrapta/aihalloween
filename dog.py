@@ -16,26 +16,19 @@ from simple_tts import make_mp3_text, play_mp3
 def init_gl() -> tuple[Groundlight, "Detector"]:
     gl = Groundlight()
     detector = gl.get_or_create_detector(
-                name="tongue-sticking",
-                query="Is there a person facing the camera and sticking out their tongue?",
+                name="doggie",
+                query="Can you see a dog?",
             )
     print(f"Using detector {detector}")
     return gl, detector
 
 
-@lru_cache(maxsize=1)
-def clown_image() -> Image.Image:
-    clown_image = Image.open("./media/scary-clown.jpg")
-    return clown_image
-
-
 def do_scream():
     print("\n\n\nSCREAMING!!!\n\n\n")
     text_choices = [
-        "I will rip that tongue right out of you.",
-        "Hey that's rude!",
-        "Cut it out, or I'll cut that tongue out of you.",
-        "Are you trying to make me angry?",
+        "Here kitty kitty kitty kitty",
+        "Woof woof",
+        "I'm a helpless squirrel stuck in this hedge, I hope that dog doesn't see me",
     ]
     chosen_text = random.choice(text_choices)
     audiofile = make_mp3_text(chosen_text)
@@ -47,7 +40,7 @@ def process_image(frame: np.ndarray) -> bool:
     start_time = time.monotonic()
     iq = gl.ask_ml(detector, frame)
     elased = time.monotonic() - start_time
-    print(f"Got {iq.result} after {elased:.2f}s on image of size {frame.shape}")
+    print(f"Got {iq.result} after {elased:.2f}s on image of size {frame.shape} with {iq.id}")
     if iq.result.label == "YES":
         do_scream()
         return True
@@ -55,7 +48,7 @@ def process_image(frame: np.ndarray) -> bool:
 
 def mainloop():
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
-    motdet = MotionDetector(pct_threshold=3.5, val_threshold=70)
+    motdet = MotionDetector(pct_threshold=1.5, val_threshold=20)
 
     ema_fps = None
     last_fps_message = 0
