@@ -3,7 +3,10 @@
 from functools import lru_cache
 import random
 import time
+import os
+import random
 
+import cv2
 from framegrab import FrameGrabber, MotionDetector
 from groundlight import Groundlight
 from imgcat import imgcat
@@ -18,7 +21,7 @@ cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names
 
 class VisualHalloween():
 
-    def __init__(self, query_name:str, query_text:str, scream_callback:callable=None, messages:list[str]=None):
+    def __init__(self, query_name:str, query_text:str, scream_callback:callable=None, messages:list[str]=None, soundfile_dir:str=""):
         self.gl = Groundlight()
         self.name = query_name
         self.detector = self.gl.get_or_create_detector(
@@ -31,6 +34,8 @@ class VisualHalloween():
             self.tts_choices = ["Oh no!"]
         else:
             self.tts_choices = messages
+        self.soundfile_dir = soundfile_dir
+
 
     def tts_scream(self):
         text_choices = self.tts_choices
@@ -39,9 +44,17 @@ class VisualHalloween():
         audiofile = make_mp3_text(chosen_text)
         play_mp3(audiofile)
 
+    def pick_and_play_soundfile(self, soundfile_dir:str):
+        soundfiles = os.listdir(soundfile_dir)
+        soundfile = random.choice(soundfiles)
+        print(f"Playing {soundfile}")
+        play_mp3(soundfile)
+
     def do_scream(self):
         if self.scream_callback:
             self.scream_callback()
+        elif self.soundfile_dir:
+            self.pick_and_play_soundfile(self.soundfile_dir)
         else:
             self.tts_scream()
 
@@ -65,13 +78,15 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             "bark bark bark",
             "I like to eat dogs",
             "woof woof bark woof",
+            "Aren't you worried a monster might jump out of the bushes and grab your dog?"
         ]),
-        VisualHalloween("baby-stroller", "Is there a baby stroller in view?", messages=[
-            "oooh that's a cute baby. she looks delicious.",
-            "don't you think it's dangerous taking a baby out on halloween?"
-            "I like to eat babies",
-            "Aren't you worried a monster might jump out of the bushes and grab your baby?"
-        ]),
+        VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
+        #VisualHalloween("baby-stroller", "Is there a baby stroller in view?", messages=[
+            #"oooh that's a cute baby. she looks delicious.",
+            #"don't you think it's dangerous taking a baby out on halloween?"
+            #"I like to eat babies",
+            #"Aren't you worried a monster might jump out of the bushes and grab your baby?"
+        #]),
         VisualHalloween("tongue-sticking","Is there a person facing the camera and sticking out their tongue?", messages=[
             "I will rip that tongue right out of you.",
             "Hey that's rude!",
@@ -103,6 +118,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             imgcat(frame[:, :, ::-1])
             for screamer in screamers:
                 screamer.process_image(frame)
+            # save the file
+            cv2.imwrite("latest.jpg", frame)
         if time.monotonic() - last_fps_message > 1:
             last_fps_message = time.monotonic()
             print(f"fps={ema_fps:.2f}")
