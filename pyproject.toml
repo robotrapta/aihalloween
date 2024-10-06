@@ -1,16 +1,15 @@
 [tool.poetry]
 name = "facescream"
-version = "0.1.0"
-description = "A spooky Halloween vision application"
+version = "0.5.0"
+description = "A spooky computer-vision based Halloween"
 authors = ["Leo Dirac <leo@groundlight.ai>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 groundlight = ">=0.18.0"
-#framegrab = { path = "../framegrab", develop = true }
-
 gtts = "^2.4.0"
 pyserial = {git = "https://github.com/pyserial/pyserial"}
 dmxenttecpro = {git = "https://github.com/SavinaRoja/DMXEnttecPro.git"}
