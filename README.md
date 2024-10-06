@@ -6,17 +6,16 @@ Install poetry if you haven't:
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
-export PATH="/home/ubuntu/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-And if you're on Ubuntu, make sure you have the right prerequisites installed:
+Make sure you have the right prerequisites installed.  For Ubuntu:
 
 ```bash
 sudo apt install -y libgl1-mesa-glx ffmpeg tmux
 ```
 
-
-Install dependencies
+Install python dependencies
 
 ```bash
 poetry install
@@ -37,7 +36,7 @@ Add something like this to your crontab:
 (Update the directory to be what you think it should be.)
 
 ```
-@reboot /home/ubuntu/facescreamer/onboot.sh
+@reboot $HOME/facescreamer/onboot.sh
 ```
 
 ## Running
