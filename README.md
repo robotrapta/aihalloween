@@ -1,5 +1,16 @@
 # FaceScreamer - A Spooky Halloween Computer Vision Project
 
+This is Jacqueline.  She watches everybody walking by, and if she seems something interesting, she'll react.
+
+![Jacqueline](media/jacqueline.jpeg)
+
+She's currently programmed to react to:
+
+- **Dogs** - She'll make a snarky comment, or maybe play some animal noises.
+- **Baby Strollers** - She'll say something slightly menacing like "Ooooh a baby!"
+- **People sticking their tongues out** - If she catches you doing this, she'll say something pretty nasty.  
+
+Last year if she got really riled up she'd blast you with a fog machine (DMX-controlled) but it seems I forgot to push that code to github after halloween, so it's lost on some micro-SD card somewhere in my house.  I'll just rewrite it.
 
 ## System Setup
 
