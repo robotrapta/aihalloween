@@ -1,6 +1,8 @@
 camera.yaml
 /audio
 
+.DS_Store
+
 *.swp
 __pycache__
 
