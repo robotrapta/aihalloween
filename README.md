@@ -9,10 +9,10 @@ curl -sSL https://install.python-poetry.org | python3 -
 export PATH="/home/ubuntu/.local/bin:$PATH"
 ```
 
-And if you're on Ubuntu, make sure you have `libGL.so` the right prerequisites installed:
+And if you're on Ubuntu, make sure you have the right prerequisites installed:
 
 ```bash
-sudo apt install libgl1-mesa-glx ffmpeg
+sudo apt install -y libgl1-mesa-glx ffmpeg tmux
 ```
 
 
