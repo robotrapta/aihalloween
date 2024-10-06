@@ -1,4 +1,4 @@
-# FaceScream - a spooky halloween vision project
+# FaceScreamer - A Spooky Halloween Computer Vision Project
 
 ## System Setup
 
@@ -33,21 +33,12 @@ poetry run framegrab preview ./camera.yaml
 
 ### Running automatically
 
-Add this to your crontab:
+Add something like this to your crontab:
+(Update the directory to be what you think it should be.)
 
 ```
-@reboot /home/ubuntu/hdev/facescreamer/onboot.sh
+@reboot /home/ubuntu/facescreamer/onboot.sh
 ```
-
-### Troubleshooting
-
-If poetry is getting stuck, try
-
-```
-export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
-```
-
-([ref](https://github.com/python-poetry/poetry/issues/1917))
 
 ## Running
 
