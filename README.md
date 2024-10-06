@@ -1,5 +1,6 @@
 # FaceScreamer - A Spooky Halloween Computer Vision Project
 
+
 ## System Setup
 
 Install poetry if you haven't:

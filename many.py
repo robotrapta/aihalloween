@@ -95,8 +95,6 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         if frame is None:
             print("No frame captured!")
             continue
-        # invert the frame by 180 degrees
-        frame = np.rot90(frame, 2)
 
         # Process the image
         motion = motdet.motion_detected(frame)

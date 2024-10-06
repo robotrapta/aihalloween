@@ -1,5 +1,6 @@
 camera.yaml
 /audio
+/latest.jpg
 
 *.swp
 __pycache__
