@@ -31,7 +31,7 @@ class VisualHalloween():
         print(f"Using detector {self.detector}")
         self.scream_callback = scream_callback
         if not messages:
-            self.tts_choices = ["Oh no!"]
+            self.tts_choices = []
         else:
             self.tts_choices = messages
         self.soundfile_dir = soundfile_dir
@@ -39,8 +39,11 @@ class VisualHalloween():
 
     def tts_scream(self):
         text_choices = self.tts_choices
+        if not text_choices:
+            print(f"No text configured - skipping scream")
+            return
         chosen_text = random.choice(text_choices)
-        print(f"\n\n\nSCREAMING!!!  {chosen_text}\n\n\n")
+        print(f"\n\n\nTTS SCREAMING!!!  {chosen_text}\nTriggered by {self.detector.name}\n\n")
         audiofile = make_mp3_text(chosen_text)
         play_mp3(audiofile)
 
@@ -78,12 +81,15 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     screamers = [
         VisualHalloween("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
         VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
-        VisualHalloween("tongue-sticking","Is there a person facing the camera and sticking out their tongue?", 
+        VisualHalloween("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
                         messages=[
-            "I will rip that tongue right out of you.",
-            "Hey that's rude!",
-            "Cut it out, or I'll cut that tongue out of you.",
-            "Are you trying to make me angry?",
+            "Take a picture, it will last longer.",
+            "My hashtag is A.I. Halloween",
+        ]),
+        VisualHalloween("pointing-at-me", "Is someone pointing at the camera?",
+                        messages=[
+            "Don't point that at me!",
+            "I will rip that finger off of you!",
         ]),
     ]
 

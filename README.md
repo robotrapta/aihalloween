@@ -4,11 +4,12 @@ This is Jacqueline.  She watches everybody walking by, and if she seems somethin
 
 ![Jacqueline](media/jacqueline.jpeg)
 
-She's currently programmed to react to:
+It's super simple to adjust what she reacts to, but currently she's programmed to react to:
 
 - **Dogs** - She'll make a snarky comment, or maybe play some animal noises.
 - **Baby Strollers** - She'll say something slightly menacing like "Ooooh a baby!"
-- **People sticking their tongues out** - If she catches you doing this, she'll say something pretty nasty.  
+- **People taking photos** - She will make a snarky comment.
+- **People pointing at her** - She will make a snarky comment.
 
 Last year if she got really riled up she'd blast you with a fog machine (DMX-controlled) but it seems I forgot to push that code to github after halloween, so it's lost on some micro-SD card somewhere in my house.  I'll just rewrite it.
 
