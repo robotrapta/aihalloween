@@ -73,6 +73,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
     motdet = MotionDetector(motdet_pct, motdet_val)
 
+    first_pass = VisualHalloween("any-people", "Are there any people on the sidewalk?")
+
     screamers = [
         VisualHalloween("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
         VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
@@ -99,12 +101,14 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         # Process the image
         motion = motdet.motion_detected(frame)
         if motion:
-            # reverse BGR for preview
-            imgcat(frame[:, :, ::-1])
-            for screamer in screamers:
-                screamer.process_image(frame)
-            # save the file
-            cv2.imwrite("latest.jpg", frame)
+            print("Motion detected - checking first pass")
+            if first_pass.process_image(frame):
+                # reverse BGR for preview
+                imgcat(frame[:, :, ::-1])
+                cv2.imwrite("latest.jpg", frame)
+                print("Found people - checking screamers")
+                for screamer in screamers:
+                    screamer.process_image(frame)
         
         # Timing summary.
         elapsed = time.monotonic() - start_time
