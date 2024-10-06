@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH="$PATH:/home/ubuntu/.local/bin/poetry"
+export PATH="$PATH:$HOME/.local/bin/poetry"
 
 cd "$(dirname "$0")"
 
@@ -8,9 +8,15 @@ cd "$(dirname "$0")"
 if [ -f ~/.groundlight/endpoint ]; then
     source ~/.groundlight/endpoint
 fi
-source ~/.groundlight/api-token
+if [ -f ~/.groundlight/api-token ]; then
+    source ~/.groundlight/api-token
+fi
+
+poetry run groundlight whoami
+if [ $? -ne 0 ]; then
+    echo "Failed to get Groundlight API token"
+    exit 1
+fi
 
 # Run
-poetry run python screamer.py &
-poetry run python baby.py &
-poetry run python dog.py &
+poetry run python many.py
