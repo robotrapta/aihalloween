@@ -14,39 +14,10 @@ import numpy as np
 from PIL import Image
 import typer
 
+from fps import FpsDisplay
 from simple_tts import make_mp3_text, play_mp3
 
 cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
-
-
-class FpsDisplay:
-    """Context manager that displays an EMA average of the FPS periodically."""
-
-    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0):
-        self.last_msg_time = time.monotonic()
-        self.ema_fps = 0
-        self.ema_alpha = ema_alpha
-        self.display_every_secs = display_every_secs
-
-    def __enter__(self):
-        self.start_time = time.monotonic()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        elapsed = time.monotonic() - self.start_time
-        self.tick(elapsed)
-
-    def tick(self, elapsed:float):
-        current_fps = 1.0 / elapsed
-
-        if self.ema_fps == 0:
-            self.ema_fps = current_fps
-        else:
-            self.ema_fps = self.ema_alpha * current_fps + (1 - self.ema_alpha) * self.ema_fps
-
-        if time.monotonic() - self.last_msg_time >= self.display_every_secs:
-            print(f"fps={self.ema_fps:.2f}")
-            self.last_msg_time = time.monotonic()
 
 
 class VisualHalloween():
