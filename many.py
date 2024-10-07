@@ -19,7 +19,40 @@ from simple_tts import make_mp3_text, play_mp3
 cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
 
 
+class FpsDisplay:
+    """Context manager that displays an EMA average of the FPS periodically."""
+
+    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0):
+        self.last_msg_time = time.monotonic()
+        self.ema_fps = 0
+        self.ema_alpha = ema_alpha
+        self.display_every_secs = display_every_secs
+
+    def __enter__(self):
+        self.start_time = time.monotonic()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        elapsed = time.monotonic() - self.start_time
+        self.tick(elapsed)
+
+    def tick(self, elapsed:float):
+        current_fps = 1.0 / elapsed
+
+        if self.ema_fps == 0:
+            self.ema_fps = current_fps
+        else:
+            self.ema_fps = self.ema_alpha * current_fps + (1 - self.ema_alpha) * self.ema_fps
+
+        if time.monotonic() - self.last_msg_time >= self.display_every_secs:
+            print(f"fps={self.ema_fps:.2f}")
+            self.last_msg_time = time.monotonic()
+
+
 class VisualHalloween():
+    """Creates a Groundlight detector for the given query, and whenever the detector triggers, it 
+    will play a soundfile or text-to-speech message.
+    """
 
     def __init__(self, query_name:str, query_text:str, scream_callback:callable=None, messages:list[str]=None, soundfile_dir:str=""):
         self.gl = Groundlight()
@@ -48,8 +81,8 @@ class VisualHalloween():
         play_mp3(audiofile)
 
     def pick_and_play_soundfile(self, soundfile_dir:str):
-        soundfiles = os.listdir(soundfile_dir)
-        soundfile = soundfile_dir + "/" + random.choice(soundfiles)
+        soundfiles = [f for f in os.listdir(soundfile_dir) if f.endswith('.mp3')]
+        soundfile = os.path.join(soundfile_dir, random.choice(soundfiles))
         print(f"Playing {soundfile}")
         play_mp3(soundfile)
 
@@ -93,39 +126,27 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         ]),
     ]
 
-    ema_fps = None
-    last_fps_message = 0
+    fps_display = FpsDisplay()
+
     while True:
-        start_time = time.monotonic()
+        with fps_display:
+            # Get the image
+            frame = grabber.grab()
+            if frame is None:
+                print("No frame captured!")
+                continue
 
-        # Get the image
-        frame = grabber.grab()
-        if frame is None:
-            print("No frame captured!")
-            continue
-
-        # Process the image
-        motion = motdet.motion_detected(frame)
-        if motion:
-            print("Motion detected - checking first pass")
-            if first_pass.process_image(frame):
-                # reverse BGR for preview
-                imgcat(frame[:, :, ::-1])
-                cv2.imwrite("latest.jpg", frame)
-                print("Found people - checking screamers")
-                for screamer in screamers:
-                    screamer.process_image(frame)
-        
-        # Timing summary.
-        elapsed = time.monotonic() - start_time
-        current_fps = 1.0 / elapsed
-        if ema_fps is None:
-            ema_fps = current_fps
-        else:
-            ema_fps = 0.9 * ema_fps + 0.1 * current_fps
-        if time.monotonic() - last_fps_message > 1:
-            last_fps_message = time.monotonic()
-            print(f"fps={ema_fps:.2f}")
+            # Process the image
+            motion = motdet.motion_detected(frame)
+            if motion:
+                print("Motion detected - checking first pass")
+                if first_pass.process_image(frame):
+                    # reverse BGR for preview
+                    imgcat(frame[:, :, ::-1])
+                    cv2.imwrite("latest.jpg", frame)
+                    print("Found people - checking screamers")
+                    for screamer in screamers:
+                        screamer.process_image(frame)
 
 
 if __name__ == "__main__":
