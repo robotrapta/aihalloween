@@ -87,20 +87,20 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
         VisualHalloween("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
                         messages=[
-            "Take a picture, it will last longer.",
+            "How do I look? Spooky?",
             "My hashtag is A.I. Halloween",
         ]),
         VisualHalloween("pointing-at-me", "Is someone pointing at the camera?",
                         messages=[
             "Don't point that at me!",
-            "I will rip that finger off of you!",
+            "I will rip that finger right off of you!",
         ]),
     ]
 
     fps_display = FpsDisplay()
 
     while True:
-        with fps_display:
+        with fps_display:  # prints fps once per second
             # Get the image
             frame = grabber.grab()
             if frame is None:
