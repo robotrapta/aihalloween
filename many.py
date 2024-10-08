@@ -1,21 +1,27 @@
 #!/usr/bin/env -S poetry run python
 
 from functools import lru_cache
-import random
-import time
+import logging
 import os
 import random
+import time
 
-import cv2
+
+# Framegrab bug makes me initialize logging before it's imported
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+from PIL import Image
 from framegrab import FrameGrabber, MotionDetector
 from groundlight import Groundlight
 from imgcat import imgcat
+import cv2
 import numpy as np
-from PIL import Image
 import typer
 
 from fps import FpsDisplay
 from simple_tts import make_mp3_text, play_mp3
+
+logger = logging.getLogger(__name__)
 
 cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
 
@@ -29,10 +35,10 @@ class VisualHalloween():
         self.gl = Groundlight()
         self.name = query_name
         self.detector = self.gl.get_or_create_detector(
-                    name=query_name,
-                    query=query_text,
-                )
-        print(f"Using detector {self.detector}")
+            name=query_name,
+            query=query_text,
+        )
+        logger.info(f"Using detector {self.detector}")
         self.scream_callback = scream_callback
         if not messages:
             self.tts_choices = []
@@ -44,17 +50,17 @@ class VisualHalloween():
     def tts_scream(self):
         text_choices = self.tts_choices
         if not text_choices:
-            print(f"No text configured - skipping scream")
+            logger.info("No text configured - skipping scream")
             return
         chosen_text = random.choice(text_choices)
-        print(f"\n\n\nTTS SCREAMING!!!  {chosen_text}\nTriggered by {self.detector.name}\n\n")
+        logger.info(f"\n\n\nTTS SCREAMING!!!  {chosen_text}\nTriggered by {self.detector.name}\n\n")
         audiofile = make_mp3_text(chosen_text)
         play_mp3(audiofile)
 
     def pick_and_play_soundfile(self, soundfile_dir:str):
         soundfiles = [f for f in os.listdir(soundfile_dir) if f.endswith('.mp3')]
         soundfile = os.path.join(soundfile_dir, random.choice(soundfiles))
-        print(f"Playing {soundfile}")
+        logger.info(f"Playing {soundfile}")
         play_mp3(soundfile)
 
     def do_scream(self):
@@ -69,7 +75,7 @@ class VisualHalloween():
         start_time = time.monotonic()
         iq = self.gl.ask_ml(self.detector, frame)
         elased = time.monotonic() - start_time
-        print(f"Got {iq.result} for {self.name} after {elased:.2f}s on image of size {frame.shape} with {iq.id}")
+        logger.info(f"Got {iq.result} for {self.name} after {elased:.2f}s on image of size {frame.shape} with {iq.id}")
         if iq.result.label == "YES":
             self.do_scream()
             return True
@@ -77,6 +83,7 @@ class VisualHalloween():
 
 
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
+    logger.info("Starting mainloop")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
     motdet = MotionDetector(motdet_pct, motdet_val)
 
@@ -87,15 +94,15 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
         VisualHalloween("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
                         messages=[
-            "How do I look? Spooky?",
-            "My hashtag is A.I. Halloween",
-        ]),
+                            "How do I look? Spooky?",
+                            "My hashtag is A.I. Halloween",
+                        ]),
         VisualHalloween("pointing-at-me", "Is someone pointing at the camera?",
                         messages=[
-            "Don't point that at me!",
-            "I will rip that finger right off of you!",
-        ]),
-    ]
+                            "Don't point that at me!",
+                            "I will rip that finger right off of you!",
+                        ]),
+]
 
     fps_display = FpsDisplay()
 
@@ -104,18 +111,18 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             # Get the image
             frame = grabber.grab()
             if frame is None:
-                print("No frame captured!")
+                logger.warning("No frame captured!")
                 continue
 
             # Process the image
             motion = motdet.motion_detected(frame)
             if motion:
-                print("Motion detected - checking first pass")
+                logger.info("Motion detected - checking first pass")
                 if first_pass.process_image(frame):
                     # reverse BGR for preview
                     imgcat(frame[:, :, ::-1])
                     cv2.imwrite("latest.jpg", frame)
-                    print("Found people - checking screamers")
+                    logger.info("Found people - checking screamers")
                     for screamer in screamers:
                         screamer.process_image(frame)
 

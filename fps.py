@@ -1,4 +1,7 @@
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FpsDisplay:
     """Context manager that displays an EMA average of the FPS periodically.
@@ -33,5 +36,5 @@ class FpsDisplay:
             self.ema_fps = self.ema_alpha * current_fps + (1 - self.ema_alpha) * self.ema_fps
 
         if time.monotonic() - self.last_msg_time >= self.display_every_secs:
-            print(f"fps={self.ema_fps:.2f}")
+            logger.info(f"fps={self.ema_fps:.2f}")
             self.last_msg_time = time.monotonic()
