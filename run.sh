@@ -19,4 +19,4 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run
-poetry run python many.py
+poetry run python mainloop.py
