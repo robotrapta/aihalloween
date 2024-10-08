@@ -8,7 +8,7 @@ import time
 
 
 # Framegrab bug makes me initialize logging before it's imported
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
 from PIL import Image
 from framegrab import FrameGrabber, MotionDetector
@@ -53,7 +53,7 @@ class VisualHalloween():
             logger.info("No text configured - skipping scream")
             return
         chosen_text = random.choice(text_choices)
-        logger.info(f"\n\n\nTTS SCREAMING!!!  {chosen_text}\nTriggered by {self.detector.name}\n\n")
+        logger.info(f"TTS speaking: '{chosen_text}'. Triggered by {self.detector.name}")
         audiofile = make_mp3_text(chosen_text)
         play_mp3(audiofile)
 
@@ -83,8 +83,9 @@ class VisualHalloween():
 
 
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
-    logger.info("Starting mainloop")
+    logger.info("Initializing camera")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
+    logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
     first_pass = VisualHalloween("any-people", "Are there any people on the sidewalk?")
@@ -104,7 +105,7 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                         ]),
 ]
 
-    fps_display = FpsDisplay()
+    fps_display = FpsDisplay(catch_exceptions=True)
 
     while True:
         with fps_display:  # prints fps once per second
@@ -124,7 +125,11 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                     cv2.imwrite("latest.jpg", frame)
                     logger.info("Found people - checking screamers")
                     for screamer in screamers:
-                        screamer.process_image(frame)
+                        # Process each screamer in a separate process
+                        if os.fork() == 0:  # Old-school and simple
+                            logger.info(f"Checking {screamer.name} in pid {os.getpid()}")
+                            screamer.process_image(frame)
+                            os._exit(0)  # Exit child process
 
 
 if __name__ == "__main__":

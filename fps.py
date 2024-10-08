@@ -13,17 +13,26 @@ class FpsDisplay:
                 process_image(img)
     """
 
-    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0):
+    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0, catch_exceptions:bool=False):
         self.last_msg_time = time.monotonic()
         self.ema_fps = 0
         self.ema_alpha = ema_alpha
         self.display_every_secs = display_every_secs
+        self.catch_exceptions = catch_exceptions
+        self.exception_delay = 5.0
 
     def __enter__(self):
         self.start_time = time.monotonic()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        if self.catch_exceptions and exc_type is not None:
+            if issubclass(exc_type, KeyboardInterrupt):
+                raise
+            logger.error(f"Exception {exc_type.__name__}: {exc_value}. Pausing for {self.exception_delay} seconds before continuing.", exc_info=(exc_type, exc_value, traceback))
+            # TODO: Maybe some kind of backoff?
+            time.sleep(self.exception_delay)
+            return True  # Prevent the exception from being propagated
         elapsed = time.monotonic() - self.start_time
         self.tick(elapsed)
 
