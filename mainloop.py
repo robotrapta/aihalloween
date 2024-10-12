@@ -6,6 +6,8 @@ import os
 import random
 import time
 
+from timebudget import timebudget
+
 
 # Framegrab bug makes me initialize logging before it's imported
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
@@ -81,6 +83,9 @@ class VisualHalloween():
             return True
         return False
 
+def save_jpeg(filename:str, jpeg_bytes:bytes):
+    with open(filename, "wb") as f:
+        f.write(jpeg_bytes)
 
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Initializing camera")
@@ -123,26 +128,19 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             if frame is None:
                 logger.warning("No frame captured!")
                 continue
-            # Resize down to 800x600
+            # Resize down to 800x600 to speed everything up
             frame = cv2.resize(frame, (800, 600))
-
-            # Process the image
             motion = motdet.motion_detected(frame)
             if motion:
-                elapsed = time.monotonic() - grab_time
-                logger.info(f"Motion detected - checking first pass (latency={elapsed:.2f}s)")
-                if first_pass.process_image(frame):
-                    # Fetch a fresh frame for the next step
-                    frame = grabber.grab()
-                    # reverse BGR for preview
-                    imgcat(frame[:, :, ::-1])
-                    cv2.imwrite("latest.jpg", frame)
-                    logger.info("Found people - checking screamers")
+                jpeg_bytes = cv2.imencode('.jpg', frame)[1].tobytes()  # Jpeg compress once for everything downstream
+                save_jpeg("status/latest-motion.jpg", jpeg_bytes)
+                if first_pass.process_image(jpeg_bytes):
+                    save_jpeg("status/latest-person.jpg", jpeg_bytes)
+                    logger.info("Motion:Found people.  Checking alerts.  grab_latency={time.monotonic() - grab_time:.2f}s")
                     for screamer in screamers:
                         if os.fork() == 0:
-                            screamer.process_image(frame)
-                            elapsed = time.monotonic() - grab_time
-                            logger.info(f"{screamer.name} latency={elapsed:.2f}s")
+                            screamer.process_image(jpeg_bytes)
+                            logger.info(f"Final {screamer.name} grab_latency={time.monotonic() - grab_time:.2f}s")
                             os._exit(0)
 
 

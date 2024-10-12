@@ -16,6 +16,7 @@ dmxenttecpro = {git = "https://github.com/SavinaRoja/DMXEnttecPro.git"}
 framegrab = "^0.7.0"
 # Numpy2 not working with framegrab for some reason.
 numpy = "^1.0"
+timebudget = "^0.7.1"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1106,6 +1106,17 @@ files = [
 ]
 
 [[package]]
+name = "timebudget"
+version = "0.7.1"
+description = "Stupidly-simple speed profiling tool for python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "timebudget-0.7.1-py3-none-any.whl", hash = "sha256:f32ff270b711772c80c6aa34fd82a2a867eba529d02062c91703c71d83266bbc"},
+    {file = "timebudget-0.7.1.tar.gz", hash = "sha256:2db5abc0e3993ccdedbed3ece7b629db7c5db7ae76bca2b2f378b4b294169813"},
+]
+
+[[package]]
 name = "typer"
 version = "0.12.5"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
@@ -1194,4 +1205,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "384c02efbb8dc0a5b2a1d2050adf7d2ea4b3cf34bfbdaf538a913e21d1e4ca53"
+content-hash = "e586cf4f1ed6aa69589a540cc0440df317b5ac3d5bf45b5cebc3758719f332f2"
