@@ -1,0 +1,25 @@
+detectors:
+  - name: "doggie"
+    query: "Can you see a dog?"
+    soundfile_dir: "media/dog"
+  - name: "baby-stroller"
+    query: "Is there a baby stroller in view?"
+    soundfile_dir: "media/baby"
+  - name: "taking-photo"
+    query: "Is someone holding a camera or cellphone towards the camera?"
+    messages:
+      - "How do I look? Spooky?"
+      - "My hashtag is A.I. Halloween"
+  - name: "pointing-at-me"
+    query: "Is someone pointing at the camera?"
+    messages:
+      - "Don't point that at me!"
+      - "I will rip that finger right off of you!"
+  - name: "staring"
+    query: "Is anybody looking straight at the camera?"
+    messages:
+      - "Hi."
+      - "What's up?"
+      - "Boo!"
+      - "What are you looking at?"
+      - "Trick or treat!"

@@ -14,6 +14,34 @@ It's super simple to adjust what she reacts to, but currently she's programmed t
 
 Last year if she got really riled up she'd blast you with a fog machine (DMX-controlled) but it seems I forgot to push that code to github after halloween, so it's lost on some micro-SD card somewhere in my house.  I'll just rewrite it.
 
+## YAML Configuration
+
+The behavior of Jacqueline is configured using a YAML file. Each detector is defined with a set of properties that determine what it reacts to and how it responds. Below is the format of the YAML configuration:
+
+```
+detectors:
+  - name: "doggie"
+    query: "Detect dogs in the frame"
+    soundfile_dir: "sounds/dogs"
+
+  - name: "baby-stroller"
+    query: "Detect baby strollers in the frame"
+    soundfile_dir: "sounds/babies"
+
+  - name: "taking-photo"
+    query: "Detect people taking photos"
+    messages:
+      - "Say cheese!"
+      - "My hashtag is A.I. Halloween"
+```
+
+### YAML Fields
+
+- **name**: A descriptive name for the detector.
+- **query**: The query text used to identify the object or action in the frame.
+- **soundfile_dir**: The directory path where sound files related to the detector are stored.  If provided, Jacqueline will randomly choose one of the files in the directory to play when the detector is triggered.
+- **messages**: A list of messages that Jacqueline can say when the detector is triggered.  These will be rendered as a voice.  Messages are only used if there is no `soundfile_dir`.
+
 ## System Setup
 
 Install poetry if you haven't:

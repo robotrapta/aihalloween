@@ -7,6 +7,7 @@ import logging
 import os
 import random
 import time
+import yaml
 
 from timebudget import timebudget
 
@@ -41,6 +42,8 @@ class HalloweenDetector():
                  trigger_callback: callable = None, 
                  messages: list[str] = None, 
                  soundfile_dir: str = ""):
+        if messages and soundfile_dir:
+            raise ValueError(f"Error in configuration for detector {query_name}: Cannot configure both 'messages' and 'soundfile_dir'. Please choose one.")
         self.gl = Groundlight()
         self.name = query_name
         self.detector = self.gl.get_or_create_detector(
@@ -90,6 +93,9 @@ class HalloweenDetector():
             return True
         return False
 
+    def __str__(self):
+        return f"HalloweenDetector(name={self.name}, query={self.detector.query})"
+
 def save_jpeg(filename_base:str, image:bytes | np.ndarray, metadata:dict={}):
     image_filename = f"status/media/{filename_base}.jpg"
     if isinstance(image, np.ndarray):
@@ -106,6 +112,21 @@ def save_jpeg(filename_base:str, image:bytes | np.ndarray, metadata:dict={}):
         doc.update(metadata)
         json.dump(doc, f)
 
+def load_detectors_from_yaml(file_path: str) -> list[HalloweenDetector]:
+    with open(file_path, 'r') as file:
+        config = yaml.safe_load(file)
+    detectors = []
+    for detector_config in config['detectors']:
+        detector = HalloweenDetector(
+            query_name=detector_config['name'],
+            query_text=detector_config['query'],
+            messages=detector_config.get('messages', []),
+            soundfile_dir=detector_config.get('soundfile_dir', "")
+        )
+        logger.info(f"Created {detector}")
+        detectors.append(detector)
+    return detectors
+
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Initializing camera")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
@@ -116,28 +137,7 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
 
     any_people = HalloweenDetector("any-people", "Are there any people on the sidewalk?")
 
-    detectors = [
-        HalloweenDetector("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
-        HalloweenDetector("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
-        HalloweenDetector("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
-                        messages=[
-                            "How do I look? Spooky?",
-                            "My hashtag is A.I. Halloween",
-                        ]),
-        HalloweenDetector("pointing-at-me", "Is someone pointing at the camera?",
-                        messages=[
-                            "Don't point that at me!",
-                            "I will rip that finger right off of you!",
-                        ]),
-        HalloweenDetector("staring", "Is anybody looking straight at the camera?",
-                        messages=[
-                            "Hi.",
-                            "What's up?",
-                            "Boo!",
-                            "What are you looking at?",
-                            "Trick or treat!",
-                        ]),
-    ]
+    detectors = load_detectors_from_yaml("halloween.yaml")
 
     fps_display = FpsDisplay(catch_exceptions=True)
 
