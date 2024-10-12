@@ -68,23 +68,28 @@
                 const triggeredBy = (image.title === "Latest Triggered" && data) ? data.triggered_by : null;
                 const container = $(`#image-container-${index}`);
 
+                // Use the image's last updated timestamp for cache busting
+                const cacheBustedSrc = `${image.src}?timestamp=${data ? data.created : new Date().getTime()}`;
+
+                // Re-render the entire container if the timestamp has changed
+                const newContainerHTML = createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy);
                 if (container.length === 0) {
                     // Create new container if it doesn't exist
-                    $('#gallery').append(createImageContainerHTML(index, image, relativeTime, triggeredBy));
+                    $('#gallery').append(newContainerHTML);
+                    console.log(`Created new container for image: ${image.src}`);
                 } else {
-                    // Update relative time and triggered by text
-                    container.find('.timestamp').text(`Created: ${relativeTime}`);
-                    if (triggeredBy) {
-                        container.find('.triggered-by').text(`Triggered by: ${triggeredBy}`);
-                    }
+                    // Replace the existing container with the new HTML
+                    container.replaceWith(newContainerHTML);
+                    console.log(`Re-rendered container for image: ${image.src}`);
                 }
+
                 imageTimestamps[index] = data ? data.created : null; // Store the timestamp
             }
 
-            function createImageContainerHTML(index, image, relativeTime, triggeredBy) {
+            function createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy) {
                 return `
                     <div class="image-container" id="image-container-${index}">
-                        <img src="${image.src}" alt="${image.alt}">
+                        <img src="${cacheBustedSrc}" alt="${image.alt}">
                         <div class="image-title">${image.title}</div>
                         <div class="timestamp">Created: ${relativeTime}</div>
                         ${triggeredBy ? `<div class="triggered-by">Triggered by: ${triggeredBy}</div>` : ''}
