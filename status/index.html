@@ -57,32 +57,33 @@
                 { order: 4, src: "media/first-frame.jpg", alt: "First Frame", title: "System boot frame" }
             ];
 
-            const imageContainers = [];
+            const imageTimestamps = []; // Array to store timestamps
 
             function getRelativeTime(created) {
                 return created ? dayjs(created).fromNow() : 'No timestamp available';
             }
 
-            const requests = images.map((image, index) => {
-                const jsonFile = image.src.replace('.jpg', '.json');
-                return $.getJSON(jsonFile).then(
-                    data => handleImageData(image, index, data),
-                    () => handleImageData(image, index, null)
-                );
-            });
-
-            function handleImageData(image, index, data) {
+            function updateImageContainer(index, image, data) {
                 const relativeTime = getRelativeTime(data ? data.created : null);
                 const triggeredBy = (image.title === "Latest Triggered" && data) ? data.triggered_by : null;
-                imageContainers[index] = {
-                    order: image.order,
-                    html: createImageContainerHTML(image, relativeTime, triggeredBy)
-                };
+                const container = $(`#image-container-${index}`);
+
+                if (container.length === 0) {
+                    // Create new container if it doesn't exist
+                    $('#gallery').append(createImageContainerHTML(index, image, relativeTime, triggeredBy));
+                } else {
+                    // Update relative time and triggered by text
+                    container.find('.timestamp').text(`Created: ${relativeTime}`);
+                    if (triggeredBy) {
+                        container.find('.triggered-by').text(`Triggered by: ${triggeredBy}`);
+                    }
+                }
+                imageTimestamps[index] = data ? data.created : null; // Store the timestamp
             }
 
-            function createImageContainerHTML(image, relativeTime, triggeredBy) {
+            function createImageContainerHTML(index, image, relativeTime, triggeredBy) {
                 return `
-                    <div class="image-container">
+                    <div class="image-container" id="image-container-${index}">
                         <img src="${image.src}" alt="${image.alt}">
                         <div class="image-title">${image.title}</div>
                         <div class="timestamp">Created: ${relativeTime}</div>
@@ -91,10 +92,36 @@
                 `;
             }
 
-            $.when(...requests).then(() => {
-                imageContainers.sort((a, b) => a.order - b.order);
-                $('#gallery').append(imageContainers.map(container => container.html).join(''));
-            });
+            function updateImages() {
+                const requests = images.map((image, index) => {
+                    const jsonFile = image.src.replace('.jpg', '.json');
+                    return $.getJSON(jsonFile).then(
+                        data => {
+                            const currentTimestamp = imageTimestamps[index];
+                            if (!currentTimestamp || currentTimestamp !== data.created) {
+                                updateImageContainer(index, image, data);
+                            } else {
+                                // Update only the relative time if the timestamp hasn't changed
+                                const relativeTime = getRelativeTime(data.created);
+                                $(`#image-container-${index} .timestamp`).text(`Created: ${relativeTime}`);
+                            }
+                        },
+                        () => updateImageContainer(index, image, null)
+                    );
+                });
+
+                $.when(...requests).then(() => {
+                    // Sort and append containers if needed
+                    const sortedContainers = images.map((_, index) => $(`#image-container-${index}`));
+                    $('#gallery').html(sortedContainers);
+                });
+            }
+
+            // Initial load
+            updateImages();
+
+            // Set interval to update images every 2 seconds
+            setInterval(updateImages, 2000);
         });
     </script>
 </head>
