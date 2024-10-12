@@ -85,7 +85,7 @@ class VisualHalloween():
             return True
         return False
 
-def save_jpeg(filename_base:str, image:bytes | np.ndarray):
+def save_jpeg(filename_base:str, image:bytes | np.ndarray, metadata:dict={}):
     image_filename = f"status/media/{filename_base}.jpg"
     if isinstance(image, np.ndarray):
         image = cv2.imencode('.jpg', image)[1].tobytes()
@@ -98,6 +98,7 @@ def save_jpeg(filename_base:str, image:bytes | np.ndarray):
             "filename": image_filename,
             "created": datetime.datetime.now().isoformat(),
         }
+        doc.update(metadata)
         json.dump(doc, f)
 
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
@@ -159,8 +160,11 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                             # So it lowers recall, but doesn't break the system.
                             if screamer.process_image(jpeg_bytes):
                                 answer = "YES"
-                                save_jpeg(f"latest-triggered-{screamer.name}", jpeg_bytes)
-                                save_jpeg("latest-triggered", jpeg_bytes)
+                                md = {
+                                    "triggered_by": screamer.name,
+                                }
+                                save_jpeg(f"latest-triggered-{screamer.name}", jpeg_bytes, metadata=md)
+                                save_jpeg("latest-triggered", jpeg_bytes, metadata=md)
                             else:
                                 answer = "NO"
                             logger.info(f"Final {screamer.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")

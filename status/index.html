@@ -58,45 +58,42 @@
             ];
 
             const imageContainers = [];
-            let completedRequests = 0;
 
             function getRelativeTime(created) {
                 return created ? dayjs(created).fromNow() : 'No timestamp available';
             }
 
-            images.forEach((image, index) => {
+            const requests = images.map((image, index) => {
                 const jsonFile = image.src.replace('.jpg', '.json');
-                $.getJSON(jsonFile, function(data) {
-                    const relativeTime = getRelativeTime(data.created);
-                    imageContainers[index] = {
-                        order: image.order,
-                        html: `
-                            <div class="image-container">
-                                <img src="${image.src}" alt="${image.alt}">
-                                <div class="image-title">${image.title}</div>
-                                <div class="timestamp">Created: ${relativeTime}</div>
-                            </div>
-                        `
-                    };
-                }).fail(function() {
-                    const relativeTime = getRelativeTime(null);
-                    imageContainers[index] = {
-                        order: image.order,
-                        html: `
-                            <div class="image-container">
-                                <img src="${image.src}" alt="${image.alt}">
-                                <div class="image-title">${image.title}</div>
-                                <div class="timestamp">Created: ${relativeTime}</div>
-                            </div>
-                        `
-                    };
-                }).always(function() {
-                    completedRequests++;
-                    if (completedRequests === images.length) {
-                        imageContainers.sort((a, b) => a.order - b.order);
-                        $('#gallery').append(imageContainers.map(container => container.html).join(''));
-                    }
-                });
+                return $.getJSON(jsonFile).then(
+                    data => handleImageData(image, index, data),
+                    () => handleImageData(image, index, null)
+                );
+            });
+
+            function handleImageData(image, index, data) {
+                const relativeTime = getRelativeTime(data ? data.created : null);
+                const triggeredBy = (image.title === "Latest Triggered" && data) ? data.triggered_by : null;
+                imageContainers[index] = {
+                    order: image.order,
+                    html: createImageContainerHTML(image, relativeTime, triggeredBy)
+                };
+            }
+
+            function createImageContainerHTML(image, relativeTime, triggeredBy) {
+                return `
+                    <div class="image-container">
+                        <img src="${image.src}" alt="${image.alt}">
+                        <div class="image-title">${image.title}</div>
+                        <div class="timestamp">Created: ${relativeTime}</div>
+                        ${triggeredBy ? `<div class="triggered-by">Triggered by: ${triggeredBy}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            $.when(...requests).then(() => {
+                imageContainers.sort((a, b) => a.order - b.order);
+                $('#gallery').append(imageContainers.map(container => container.html).join(''));
             });
         });
     </script>
