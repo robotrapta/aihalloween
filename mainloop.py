@@ -30,12 +30,17 @@ logger = logging.getLogger(__name__)
 cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
 
 
-class VisualHalloween():
+class HalloweenDetector():
     """Creates a Groundlight detector for the given query, and whenever the detector triggers, it 
     will play a soundfile or text-to-speech message.
     """
 
-    def __init__(self, query_name:str, query_text:str, scream_callback:callable=None, messages:list[str]=None, soundfile_dir:str=""):
+    def __init__(self, 
+                 query_name: str, 
+                 query_text: str, 
+                 trigger_callback: callable = None, 
+                 messages: list[str] = None, 
+                 soundfile_dir: str = ""):
         self.gl = Groundlight()
         self.name = query_name
         self.detector = self.gl.get_or_create_detector(
@@ -43,7 +48,7 @@ class VisualHalloween():
             query=query_text,
         )
         logger.info(f"Using detector {self.detector}")
-        self.scream_callback = scream_callback
+        self.trigger_callback = trigger_callback
         if not messages:
             self.tts_choices = []
         else:
@@ -51,10 +56,10 @@ class VisualHalloween():
         self.soundfile_dir = soundfile_dir
 
 
-    def tts_scream(self):
+    def tts_trigger(self):
         text_choices = self.tts_choices
         if not text_choices:
-            logger.info("No text configured - skipping scream")
+            logger.info("No text configured - skipping trigger")
             return
         chosen_text = random.choice(text_choices)
         logger.info(f"TTS speaking: '{chosen_text}'. Triggered by {self.detector.name}")
@@ -67,13 +72,13 @@ class VisualHalloween():
         logger.info(f"Playing {soundfile}")
         play_mp3(soundfile)
 
-    def do_scream(self):
-        if self.scream_callback:
-            self.scream_callback()
+    def do_trigger(self):
+        if self.trigger_callback:
+            self.trigger_callback()
         elif self.soundfile_dir:
             self.pick_and_play_soundfile(self.soundfile_dir)
         else:
-            self.tts_scream()
+            self.tts_trigger()
 
     def process_image(self, frame: np.ndarray) -> bool:
         start_time = time.monotonic()
@@ -81,7 +86,7 @@ class VisualHalloween():
         elased = time.monotonic() - start_time
         logger.info(f"{self.name} got {iq.result.label} ({iq.result.confidence:.2f}) after {elased:.2f}s iq={iq.id}")
         if iq.result.label == "YES":
-            self.do_scream()
+            self.do_trigger()
             return True
         return False
 
@@ -109,22 +114,22 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
-    any_people = VisualHalloween("any-people", "Are there any people on the sidewalk?")
+    any_people = HalloweenDetector("any-people", "Are there any people on the sidewalk?")
 
-    screamers = [
-        VisualHalloween("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
-        VisualHalloween("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
-        VisualHalloween("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
+    detectors = [
+        HalloweenDetector("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
+        HalloweenDetector("baby-stroller", "Is there a baby stroller in view?", soundfile_dir="media/baby"),
+        HalloweenDetector("taking-photo", "Is someone holding a camera or cellphone towards the camera?",
                         messages=[
                             "How do I look? Spooky?",
                             "My hashtag is A.I. Halloween",
                         ]),
-        VisualHalloween("pointing-at-me", "Is someone pointing at the camera?",
+        HalloweenDetector("pointing-at-me", "Is someone pointing at the camera?",
                         messages=[
                             "Don't point that at me!",
                             "I will rip that finger right off of you!",
                         ]),
-        VisualHalloween("staring", "Is anybody looking straight at the camera?",
+        HalloweenDetector("staring", "Is anybody looking straight at the camera?",
                         messages=[
                             "Hi.",
                             "What's up?",
@@ -153,21 +158,21 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                 if any_people.process_image(jpeg_bytes):
                     save_jpeg("latest-person", jpeg_bytes)
                     logger.info("Motion:Found people.  Checking alerts.  grab_latency={time.monotonic() - grab_time:.2f}s")
-                    for screamer in screamers:
+                    for detector in detectors:
                         if os.fork() == 0:
                             # Using os.fork here is a blunt hammer, but effective.
                             # We're getting some HTTP errors I think from this.  But the sub-processes just die.
                             # So it lowers recall, but doesn't break the system.
-                            if screamer.process_image(jpeg_bytes):
+                            if detector.process_image(jpeg_bytes):
                                 answer = "YES"
                                 md = {
-                                    "triggered_by": screamer.name,
+                                    "triggered_by": detector.name,
                                 }
-                                save_jpeg(f"latest-triggered-{screamer.name}", jpeg_bytes, metadata=md)
+                                save_jpeg(f"latest-triggered-{detector.name}", jpeg_bytes, metadata=md)
                                 save_jpeg("latest-triggered", jpeg_bytes, metadata=md)
                             else:
                                 answer = "NO"
-                            logger.info(f"Final {screamer.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
+                            logger.info(f"Final {detector.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
                             os._exit(0)
 
 

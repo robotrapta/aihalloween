@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "facescream"
-version = "0.5.0"
+name = "aihalloween"
+version = "0.7.0"
 description = "A spooky computer-vision based Halloween"
 authors = ["Leo Dirac <leo@groundlight.ai>"]
 license = "MIT"
