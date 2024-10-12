@@ -110,3 +110,9 @@ Try taking a picture of the camera, or pointing at it, or just staring.
 ## Monitoring
 
 There's a simple web server running on the machine that will show you the latest images.  Just open a web browser and go to http://your-machine-ip:8000/
+
+It will show you the most recent images of various categories (triggered, motion detection, person) and if things are working properly, automatically reload them as new images come in.
+
+<img src="media/web-monitor.jpg" alt="Web Monitoring Interface" style="max-width: 600px;">
+
+

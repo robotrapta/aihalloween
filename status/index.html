@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
     <title>AI Halloween</title>
+    <!-- load the Atkinson Hyperlegible (AHL) font, because it's awesome. -->
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #8B4500; /* Very dark orange */
             color: white;
             text-align: center;
+            font-family: 'Atkinson Hyperlegible', sans-serif; /* Updated font-family */
         }
         #gallery {
             display: flex;
@@ -132,9 +136,12 @@
 </head>
 <body>
     <h1>AI Halloween</h1>
-    <h2>Recent Images</h2>
     <div id="gallery">
         <!-- Image containers will be dynamically added here by jQuery -->
+    </div>
+
+    <div id="explanation">
+        <p>This page shows you the most recent images of various categories (triggered, motion detection, person) and if things are working properly, automatically reload them as new images come in.</p>
     </div>
 </body>
 </html>
