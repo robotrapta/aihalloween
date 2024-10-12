@@ -17,4 +17,5 @@ fi
 poetry install
 poetry run python check-audio.py
 tmux new-session -d -s facescreamer "$SCRIPT_DIR/run.sh; bash"
+tmux new-session -d -s psst "$SCRIPT_DIR/media/psst/soundloop.sh"
 
