@@ -75,7 +75,7 @@ class VisualHalloween():
         start_time = time.monotonic()
         iq = self.gl.ask_ml(self.detector, frame)
         elased = time.monotonic() - start_time
-        logger.info(f"Got {iq.result} for {self.name} after {elased:.2f}s on image of size {frame.shape} with {iq.id}")
+        logger.info(f"{self.name} got {iq.result.label} ({iq.result.confidence:.2f}) after {elased:.2f}s iq={iq.id}")
         if iq.result.label == "YES":
             self.do_scream()
             return True
@@ -129,7 +129,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             # Process the image
             motion = motdet.motion_detected(frame)
             if motion:
-                logger.info("Motion detected - checking first pass")
+                elapsed = time.monotonic() - grab_time
+                logger.info(f"Motion detected - checking first pass (latency={elapsed:.2f}s)")
                 if first_pass.process_image(frame):
                     # Fetch a fresh frame for the next step
                     frame = grabber.grab()
@@ -141,7 +142,7 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                         if os.fork() == 0:
                             screamer.process_image(frame)
                             elapsed = time.monotonic() - grab_time
-                            logger.info(f"Screamer {screamer.name} total response time: {elapsed:.2f}s")
+                            logger.info(f"{screamer.name} latency={elapsed:.2f}s")
                             os._exit(0)
 
 
