@@ -1,6 +1,8 @@
 #!/usr/bin/env -S poetry run python
 
 from functools import lru_cache
+import datetime
+import json
 import logging
 import os
 import random
@@ -83,15 +85,26 @@ class VisualHalloween():
             return True
         return False
 
-def save_jpeg(filename:str, jpeg_bytes:bytes):
-    with open(filename, "wb") as f:
-        f.write(jpeg_bytes)
+def save_jpeg(filename_base:str, image:bytes | np.ndarray):
+    image_filename = f"status/media/{filename_base}.jpg"
+    if isinstance(image, np.ndarray):
+        image = cv2.imencode('.jpg', image)[1].tobytes()
+    with open(image_filename, "wb") as f:
+        f.write(image)
+    # save a .json status file with the filename, creation time, and md5sum of the image    
+    status_filename = f"status/{filename_base}.json"
+    with open(status_filename, "w") as f:
+        doc = {
+            "filename": image_filename,
+            "created": datetime.datetime.now().isoformat(),
+        }
+        json.dump(doc, f)
 
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Initializing camera")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
     first_frame = grabber.grab()
-    cv2.imwrite("status/first-frame.jpg", first_frame)
+    save_jpeg("first-frame", first_frame)
     logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
@@ -135,9 +148,9 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             motion = motdet.motion_detected(frame)
             if motion:
                 jpeg_bytes = cv2.imencode('.jpg', frame)[1].tobytes()  # Jpeg compress once for everything downstream
-                save_jpeg("status/latest-motion.jpg", jpeg_bytes)
+                save_jpeg("latest-motion", jpeg_bytes)
                 if any_people.process_image(jpeg_bytes):
-                    save_jpeg("status/latest-person.jpg", jpeg_bytes)
+                    save_jpeg("latest-person", jpeg_bytes)
                     logger.info("Motion:Found people.  Checking alerts.  grab_latency={time.monotonic() - grab_time:.2f}s")
                     for screamer in screamers:
                         if os.fork() == 0:
@@ -146,8 +159,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                             # So it lowers recall, but doesn't break the system.
                             if screamer.process_image(jpeg_bytes):
                                 answer = "YES"
-                                save_jpeg(f"status/triggered-{screamer.name}.jpg", jpeg_bytes)
-                                save_jpeg(f"status/latest-triggered.jpg", jpeg_bytes)
+                                save_jpeg(f"latest-triggered-{screamer.name}", jpeg_bytes)
+                                save_jpeg("latest-triggered", jpeg_bytes)
                             else:
                                 answer = "NO"
                             logger.info(f"Final {screamer.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")

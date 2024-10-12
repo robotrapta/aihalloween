@@ -1,6 +1,6 @@
 camera.yaml
 /audio
-/status/*.jpg
+/status/media
 
 .DS_Store
 
