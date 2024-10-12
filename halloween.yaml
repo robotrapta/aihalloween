@@ -1,3 +1,8 @@
+motdet_pct: 1.5
+motdet_val: 50
+resize_width: 800
+resize_height: 600
+
 detectors:
   - name: "doggie"
     query: "Can you see a dog?"

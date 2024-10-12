@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import random
+import sys
 import time
 import yaml
 
@@ -21,14 +22,11 @@ from groundlight import Groundlight
 from imgcat import imgcat
 import cv2
 import numpy as np
-import typer
 
 from fps import FpsDisplay
 from simple_tts import make_mp3_text, play_mp3
 
 logger = logging.getLogger(__name__)
-
-cli_app = typer.Typer(no_args_is_help=True, context_settings={"help_option_names": ["-h", "--help"]})
 
 
 class HalloweenDetector():
@@ -112,11 +110,23 @@ def save_jpeg(filename_base:str, image:bytes | np.ndarray, metadata:dict={}):
         doc.update(metadata)
         json.dump(doc, f)
 
-def load_detectors_from_yaml(file_path: str) -> list[HalloweenDetector]:
-    with open(file_path, 'r') as file:
-        config = yaml.safe_load(file)
+class Config:
+    def __init__(self, file_path: str):
+        with open(file_path, 'r') as file:
+            self.config = yaml.safe_load(file)
+
+    def get_motdet_params(self):
+        return self.config.get('motdet_pct', 1.5), self.config.get('motdet_val', 50)
+
+    def get_resize_dimensions(self):
+        return self.config.get('resize_width', 800), self.config.get('resize_height', 600)
+
+    def get_detectors(self):
+        return self.config.get('detectors', [])
+
+def load_detectors_from_yaml(config: Config) -> list[HalloweenDetector]:
     detectors = []
-    for detector_config in config['detectors']:
+    for detector_config in config.get_detectors():
         detector = HalloweenDetector(
             query_name=detector_config['name'],
             query_text=detector_config['query'],
@@ -127,7 +137,12 @@ def load_detectors_from_yaml(file_path: str) -> list[HalloweenDetector]:
         detectors.append(detector)
     return detectors
 
-def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
+def mainloop(config_file: str):
+    logger.info(f"Loading configuration from {config_file}")
+    config = Config(config_file)
+    motdet_pct, motdet_val = config.get_motdet_params()
+    resize_width, resize_height = config.get_resize_dimensions()
+
     logger.info("Initializing camera")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
     first_frame = grabber.grab()
@@ -135,9 +150,9 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
+    detectors = load_detectors_from_yaml(config)
+    # A special non-configurable detector that looks for people.
     any_people = HalloweenDetector("any-people", "Are there any people on the sidewalk?")
-
-    detectors = load_detectors_from_yaml("halloween.yaml")
 
     fps_display = FpsDisplay(catch_exceptions=True)
 
@@ -149,8 +164,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             if frame is None:
                 logger.warning("No frame captured!")
                 continue
-            # Resize down to 800x600 to speed everything up
-            frame = cv2.resize(frame, (800, 600))
+            # Resize down to configured dimensions to speed everything up
+            frame = cv2.resize(frame, (resize_width, resize_height))
             motion = motdet.motion_detected(frame)
             if motion:
                 jpeg_bytes = cv2.imencode('.jpg', frame)[1].tobytes()  # Jpeg compress once for everything downstream
@@ -175,6 +190,11 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                             logger.info(f"Final {detector.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
                             os._exit(0)
 
+# ... existing code ...
 
 if __name__ == "__main__":
-    mainloop()
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+    else:
+        config_file = "halloween.yaml"
+    mainloop(config_file=config_file)

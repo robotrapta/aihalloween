@@ -100,7 +100,7 @@ export GROUNDLIGHT_API_TOKEN=api_2Q...
 Then run
 
 ```bash
-poetry run python ./screamer.py
+poetry run python ./mainloop.py ./halloween.yaml
 ```
 
 ### What to do?
@@ -109,4 +109,4 @@ Try taking a picture of the camera, or pointing at it, or just staring.
 
 ## Monitoring
 
-There's a simple web server running on the machine that will show you the latest images.  Just open a web browser and go to http://<your-machine-ip>:8000/
+There's a simple web server running on the machine that will show you the latest images.  Just open a web browser and go to http://your-machine-ip:8000/
