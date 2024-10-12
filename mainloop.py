@@ -103,7 +103,15 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                             "Don't point that at me!",
                             "I will rip that finger right off of you!",
                         ]),
-]
+        VisualHalloween("staring", "Is anybody looking straight at the camera?",
+                        messages=[
+                            "Hi.",
+                            "What's up?",
+                            "Boo!",
+                            "What are you looking at?",
+                            "Trick or treat!",
+                        ]),
+    ]
 
     fps_display = FpsDisplay(catch_exceptions=True)
 
@@ -111,25 +119,30 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
         with fps_display:  # prints fps once per second
             # Get the image
             frame = grabber.grab()
+            grab_time = time.monotonic()
             if frame is None:
                 logger.warning("No frame captured!")
                 continue
+            # Resize down to 800x600
+            frame = cv2.resize(frame, (800, 600))
 
             # Process the image
             motion = motdet.motion_detected(frame)
             if motion:
                 logger.info("Motion detected - checking first pass")
                 if first_pass.process_image(frame):
+                    # Fetch a fresh frame for the next step
+                    frame = grabber.grab()
                     # reverse BGR for preview
                     imgcat(frame[:, :, ::-1])
                     cv2.imwrite("latest.jpg", frame)
                     logger.info("Found people - checking screamers")
                     for screamer in screamers:
-                        # Process each screamer in a separate process
-                        if os.fork() == 0:  # Old-school and simple
-                            logger.info(f"Checking {screamer.name} in pid {os.getpid()}")
+                        if os.fork() == 0:
                             screamer.process_image(frame)
-                            os._exit(0)  # Exit child process
+                            elapsed = time.monotonic() - grab_time
+                            logger.info(f"Screamer {screamer.name} total response time: {elapsed:.2f}s")
+                            os._exit(0)
 
 
 if __name__ == "__main__":
