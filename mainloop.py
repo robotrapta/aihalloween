@@ -92,7 +92,7 @@ def save_jpeg(filename_base:str, image:bytes | np.ndarray):
     with open(image_filename, "wb") as f:
         f.write(image)
     # save a .json status file with the filename, creation time, and md5sum of the image    
-    status_filename = f"status/{filename_base}.json"
+    status_filename = f"status/media/{filename_base}.json"
     with open(status_filename, "w") as f:
         doc = {
             "filename": image_filename,

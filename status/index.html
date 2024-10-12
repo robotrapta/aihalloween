@@ -38,27 +38,73 @@
             margin-top: 10px;
             font-size: 1.2em;
         }
+        .timestamp {
+            font-size: 0.9em;
+            color: #ccc;
+        }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+    <script>
+        dayjs.extend(dayjs_plugin_relativeTime);
+
+        $(document).ready(function() {
+            const images = [
+                { order: 1, src: "media/latest-triggered.jpg", alt: "Latest Triggered", title: "Latest Triggered" },
+                { order: 2, src: "media/latest-person.jpg", alt: "Latest Person", title: "Latest Person Detected" },
+                { order: 3, src: "media/latest-motion.jpg", alt: "Latest Motion", title: "Latest Motion Detected" },
+                { order: 4, src: "media/first-frame.jpg", alt: "First Frame", title: "System boot frame" }
+            ];
+
+            const imageContainers = [];
+            let completedRequests = 0;
+
+            function getRelativeTime(created) {
+                return created ? dayjs(created).fromNow() : 'No timestamp available';
+            }
+
+            images.forEach((image, index) => {
+                const jsonFile = image.src.replace('.jpg', '.json');
+                $.getJSON(jsonFile, function(data) {
+                    const relativeTime = getRelativeTime(data.created);
+                    imageContainers[index] = {
+                        order: image.order,
+                        html: `
+                            <div class="image-container">
+                                <img src="${image.src}" alt="${image.alt}">
+                                <div class="image-title">${image.title}</div>
+                                <div class="timestamp">Created: ${relativeTime}</div>
+                            </div>
+                        `
+                    };
+                }).fail(function() {
+                    const relativeTime = getRelativeTime(null);
+                    imageContainers[index] = {
+                        order: image.order,
+                        html: `
+                            <div class="image-container">
+                                <img src="${image.src}" alt="${image.alt}">
+                                <div class="image-title">${image.title}</div>
+                                <div class="timestamp">Created: ${relativeTime}</div>
+                            </div>
+                        `
+                    };
+                }).always(function() {
+                    completedRequests++;
+                    if (completedRequests === images.length) {
+                        imageContainers.sort((a, b) => a.order - b.order);
+                        $('#gallery').append(imageContainers.map(container => container.html).join(''));
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <h1>AI Halloween - Recent Images</h1>
     <div id="gallery">
-        <div class="image-container">
-            <img src="media/latest-triggered.jpg" alt="Latest Triggered">
-            <div class="image-title">Latest Triggered</div>
-        </div>
-        <div class="image-container">
-            <img src="media/latest-person.jpg" alt="Latest Person">
-            <div class="image-title">Latest Person Detected</div>
-        </div>
-        <div class="image-container">
-            <img src="media/latest-motion.jpg" alt="Latest Motion">
-            <div class="image-title">Latest Motion Detected</div>
-        </div>
-        <div class="image-container">
-            <img src="media/first-frame.jpg" alt="First Frame">
-            <div class="image-title">System boot frame</div>
-        </div>
+        <!-- Image containers will be dynamically added here by jQuery -->
     </div>
 </body>
 </html>
