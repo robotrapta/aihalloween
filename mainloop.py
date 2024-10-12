@@ -93,7 +93,7 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
-    first_pass = VisualHalloween("any-people", "Are there any people on the sidewalk?")
+    any_people = VisualHalloween("any-people", "Are there any people on the sidewalk?")
 
     screamers = [
         VisualHalloween("doggie", "Can you see a dog?", soundfile_dir="media/dog"),
@@ -134,13 +134,20 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
             if motion:
                 jpeg_bytes = cv2.imencode('.jpg', frame)[1].tobytes()  # Jpeg compress once for everything downstream
                 save_jpeg("status/latest-motion.jpg", jpeg_bytes)
-                if first_pass.process_image(jpeg_bytes):
+                if any_people.process_image(jpeg_bytes):
                     save_jpeg("status/latest-person.jpg", jpeg_bytes)
                     logger.info("Motion:Found people.  Checking alerts.  grab_latency={time.monotonic() - grab_time:.2f}s")
                     for screamer in screamers:
                         if os.fork() == 0:
-                            screamer.process_image(jpeg_bytes)
-                            logger.info(f"Final {screamer.name} grab_latency={time.monotonic() - grab_time:.2f}s")
+                            # Using os.fork here is a blunt hammer, but effective.
+                            # We're getting some HTTP errors I think from this.  But the sub-processes just die.
+                            # So it lowers recall, but doesn't break the system.
+                            if screamer.process_image(jpeg_bytes):
+                                answer = "YES"
+                                save_jpeg(f"status/latest-{screamer.name}.jpg", jpeg_bytes)
+                            else:
+                                answer = "NO"
+                            logger.info(f"Final {screamer.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
                             os._exit(0)
 
 
