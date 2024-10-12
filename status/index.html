@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Halloween - Image Gallery</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            text-align: center;
+        }
+        #gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image-container {
+            margin: 10px;
+            max-width: 400px;
+            flex: 1 1 300px; /* Flex-grow, flex-shrink, flex-basis */
+            border: 1px solid #444; /* Subtle border color */
+            background-color: #222; /* Dark background color */
+            padding: 15px; /* Padding for spacing */
+            box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+            border-radius: 8px; /* Rounded corners */
+            transition: transform 0.3s; /* Smooth transition for hover effect */
+        }
+        .image-container:hover {
+            transform: scale(1.05); /* Slight zoom effect on hover */
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px; /* Slightly rounded corners for images */
+        }
+        .image-title {
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Halloween - Spooky Image Gallery</h1>
+    <div id="gallery">
+        <div class="image-container">
+            <img src="latest-triggered.jpg" alt="Latest Triggered">
+            <div class="image-title">Latest Triggered</div>
+        </div>
+        <div class="image-container">
+            <img src="latest-person.jpg" alt="Latest Person">
+            <div class="image-title">Latest Person Detected</div>
+        </div>
+        <div class="image-container">
+            <img src="latest-motion.jpg" alt="Latest Motion">
+            <div class="image-title">Latest Motion Detected</div>
+        </div>
+        <div class="image-container">
+            <img src="first-frame.jpg" alt="First Frame">
+            <div class="image-title">System boot frame</div>
+        </div>
+    </div>
+</body>
+</html>

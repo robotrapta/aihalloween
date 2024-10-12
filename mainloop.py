@@ -90,6 +90,8 @@ def save_jpeg(filename:str, jpeg_bytes:bytes):
 def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
     logger.info("Initializing camera")
     grabber = FrameGrabber.from_yaml("camera.yaml")[0]
+    first_frame = grabber.grab()
+    cv2.imwrite("status/first-frame.jpg", first_frame)
     logger.info("Camera initialized")
     motdet = MotionDetector(motdet_pct, motdet_val)
 
@@ -144,7 +146,8 @@ def mainloop(motdet_pct:float=1.5, motdet_val:int=50):
                             # So it lowers recall, but doesn't break the system.
                             if screamer.process_image(jpeg_bytes):
                                 answer = "YES"
-                                save_jpeg(f"status/latest-{screamer.name}.jpg", jpeg_bytes)
+                                save_jpeg(f"status/triggered-{screamer.name}.jpg", jpeg_bytes)
+                                save_jpeg(f"status/latest-triggered.jpg", jpeg_bytes)
                             else:
                                 answer = "NO"
                             logger.info(f"Final {screamer.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")

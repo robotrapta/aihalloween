@@ -13,9 +13,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-#git pull origin main
-poetry install
+if [ -n "$REINSTALL" ]; then
+    git pull origin main
+    poetry install
+fi
+
 poetry run python check-audio.py
 tmux new-session -d -s aihalloween "$SCRIPT_DIR/run.sh; bash"
 tmux new-session -d -s psst "$SCRIPT_DIR/media/psst/soundloop.sh"
+# Launch the web server
+tmux new-session -d -s web "$SCRIPT_DIR/serve-images.sh"
 

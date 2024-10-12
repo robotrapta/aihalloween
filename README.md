@@ -77,4 +77,8 @@ poetry run python ./screamer.py
 
 ### What to do?
 
-Try looking at the camera and sticking out your tongue.
+Try taking a picture of the camera, or pointing at it, or just staring.
+
+## Monitoring
+
+There's a simple web server running on the machine that will show you the latest images.  Just open a web browser and go to http://<your-machine-ip>:8000/
