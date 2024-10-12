@@ -1,4 +1,4 @@
-# FaceScreamer - A Spooky Halloween Computer Vision Project
+# AI Halloween - A Spooky Computer Vision Project
 
 This is Jacqueline.  She watches everybody walking by, and if she seems something interesting, she'll react.
 
@@ -10,6 +10,7 @@ It's super simple to adjust what she reacts to, but currently she's programmed t
 - **Baby Strollers** - She'll say something slightly menacing like "Ooooh a baby!"
 - **People taking photos** - She will make a snarky comment.
 - **People pointing at her** - She will make a snarky comment.
+- **People staring at her** - She will say Hi.
 
 Last year if she got really riled up she'd blast you with a fog machine (DMX-controlled) but it seems I forgot to push that code to github after halloween, so it's lost on some micro-SD card somewhere in my house.  I'll just rewrite it.
 
@@ -49,7 +50,14 @@ Add something like this to your crontab:
 (Update the directory to be what you think it should be.)
 
 ```
-@reboot $HOME/facescreamer/onboot.sh
+@reboot $HOME/aihalloween/onboot.sh
+```
+
+Cron can be tricky.  You likely want a line like this to set the `PATH` correctly: 
+(Update the username if you're not using `ubuntu`) 
+
+```
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/home/ubuntu/.local/bin/
 ```
 
 ## Running
