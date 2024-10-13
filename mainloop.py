@@ -9,6 +9,7 @@ import random
 import sys
 import time
 import yaml
+from pathlib import Path
 
 from timebudget import timebudget
 
@@ -29,31 +30,66 @@ from simple_tts import make_mp3_text, play_mp3
 logger = logging.getLogger(__name__)
 
 
+class Debouncer:
+    """Prevents events from firing too quickly.  Works across processes by using a filesystem semaphore."""
+    def __init__(self, name: str, delay: float = 1.0):
+        self.name = name
+        self.lock_file = Path(f"/tmp/debounce-{name}")
+        self.delay = delay
+
+    def is_ready(self) -> bool:
+        """Public method to check if the debouncer is ready to fire again.  Will only return True if 
+        nothing else has gotten True in the last (delay) seconds."""
+        if self._check_ready():
+            logger.debug(f"Touching {self.lock_file}")
+            # Touch the file to update its last modified time
+            self.lock_file.touch()
+            return True
+        return False
+
+    def _check_ready(self) -> bool:
+        """Checks if the debouncer is ready to fire again based on the lock file timestamp."""
+        if not self.lock_file.exists():
+            logger.debug(f"Lock file {self.lock_file} does not exist")
+            return True
+        
+        last_modified = self.lock_file.stat().st_mtime
+        elapsed = time.time() - last_modified  # Use time.time() instead of time.monotonic()
+        logger.debug(f"Lock file {self.lock_file} last modified {last_modified} - {elapsed}s ago")
+        return elapsed > self.delay
+
+
 class HalloweenDetector():
     """Creates a Groundlight detector for the given query, and whenever the detector triggers, it 
     will play a soundfile or text-to-speech message.
     """
 
-    def __init__(self, 
-                 query_name: str, 
-                 query_text: str, 
-                 trigger_callback: callable = None, 
-                 messages: list[str] = None, 
+    def __init__(self,
+                 name: str,
+                 query: str,
+                 trigger_callback: callable = None,
+                 messages: list[str] = None,
                  soundfile_dir: str = "",
-                 volume: int = 100):
-        if messages and soundfile_dir:
-            raise ValueError(f"Error in configuration for detector {query_name}: Cannot configure both 'messages' and 'soundfile_dir'. Please choose one.")
-        self.gl = Groundlight()
-        self.name = query_name
-        self.detector = self.gl.get_or_create_detector(
-            name=query_name,
-            query=query_text,
-        )
-        logger.info(f"Using detector {self.detector}")
+                 volume: int = 100,
+                 debounce_time: float = 3.0):
+        self.name = name
+        self.query = query
         self.trigger_callback = trigger_callback
-        self.tts_choices = messages if messages else []
+        self.tts_choices = messages
         self.soundfile_dir = soundfile_dir
         self.volume = volume
+        self.debounce_time = debounce_time
+
+        if self.tts_choices and self.soundfile_dir:
+            raise ValueError(f"Error in configuration for detector {self.name}: Cannot configure both 'messages' and 'soundfile_dir'. Please choose one.")
+
+        self.gl = Groundlight()
+        self.detector = self.gl.get_or_create_detector(
+            name=self.name,
+            query=self.query,
+        )
+        logger.info(f"Using detector {self.detector}")
+        self.debouncer = Debouncer("trigger", delay=debounce_time)
 
     def tts_trigger(self):
         text_choices = self.tts_choices
@@ -72,6 +108,9 @@ class HalloweenDetector():
         play_mp3(soundfile, volume=self.volume)
 
     def do_trigger(self):
+        if not self.debouncer.is_ready():
+            logger.info(f"Debouncer is not ready - skipping trigger")
+            return
         if self.trigger_callback:
             self.trigger_callback()
         elif self.soundfile_dir:
@@ -122,18 +161,18 @@ class Config:
     def get_detectors(self):
         return self.config.get('detectors', [])
 
+    def get_debounce_time(self):
+        return self.config.get('debounce_time', 3.0)
+
 def load_detectors_from_yaml(config: Config) -> list[HalloweenDetector]:
     detectors = []
-    base_volume = config.config.get('base_volume', 100)  # Get base_volume from config
+    base_volume = config.config.get('base_volume', 100)
+    debounce_time = config.get_debounce_time()  # Get debounce time from config
     for detector_config in config.get_detectors():
-        volume = base_volume * (detector_config.get('volume', 100) / 100)
-        detector = HalloweenDetector(
-            query_name=detector_config['name'],
-            query_text=detector_config['query'],
-            messages=detector_config.get('messages', []),
-            soundfile_dir=detector_config.get('soundfile_dir', ""),
-            volume=volume,
-        )
+        # Calculate volume based on base_volume and detector-specific volume
+        detector_config['volume'] = base_volume * (detector_config.get('volume', 100) / 100)
+        detector_config['debounce_time'] = debounce_time  # Add debounce time to the config
+        detector = HalloweenDetector(**detector_config)
         logger.info(f"Created {detector}")
         detectors.append(detector)
     return detectors

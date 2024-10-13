@@ -23,17 +23,17 @@ base_volume: 400  # Turn up volume for everything to 400%
 
 detectors:
   - name: "doggie"
-    query: "Detect dogs in the frame"
+    query: "Are there any dogs in view?"
     soundfile_dir: "sounds/dogs"
     volume: 60   # Turn down volume for dog noises.
 
   - name: "baby-stroller"
-    query: "Detect baby strollers in the frame"
+    query: "Is there a baby stroller in view?"
     soundfile_dir: "sounds/babies"
     # No specific volume, uses base_volume
 
   - name: "taking-photo"
-    query: "Detect people taking photos"
+    query: "Is someone taking a photo?"
     messages:
       - "Say cheese!"
       - "My hashtag is A.I. Halloween"
