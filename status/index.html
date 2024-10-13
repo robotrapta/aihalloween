@@ -103,7 +103,8 @@
 
             function updateImages() {
                 const requests = images.map((image, index) => {
-                    const jsonFile = image.src.replace('.jpg', '.json');
+                    // Append a cache-busting query parameter to the JSON file URL
+                    const jsonFile = `${image.src.replace('.jpg', '.json')}?timestamp=${new Date().getTime()}`;
                     return $.getJSON(jsonFile).then(
                         data => {
                             const currentTimestamp = imageTimestamps[index];
