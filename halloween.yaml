@@ -2,7 +2,7 @@ motdet_pct: 1.5
 motdet_val: 50
 resize_width: 800
 resize_height: 600
-base_volume: 500
+base_volume: 400
 
 detectors:
   - name: "doggie"
@@ -19,13 +19,24 @@ detectors:
     messages:
       - "How do I look? Spooky?"
       - "My hashtag is A.I. Halloween"
-  - name: "pointing-at-me"
-    query: "Is someone pointing at the camera?"
+
+  - name: "running2"
+    query: "Is the person obviously running fast?"
     messages:
-      - "Don't point that at me!"
-      - "I will rip that finger right off of you!"
-  - name: "staring"
-    query: "Is anybody looking straight at the camera?"
+      - "You can run, but you can't hide!"
+      - "Run away!"
+      - "I'm coming to get you!"
+
+  - name: "messing-with-camera"
+    query: "Is anybody very close to the camera, trying to touch it?"
+    messages:
+      - "Don't touch me!"
+      - "Get away from me!"
+      - "Back off, or there will be trouble!"
+      - "You're going to regret this!"
+
+  - name: "staring2"
+    query: "Is anybody standing still, up close, looking straight at the camera?"
     messages:
       - "Hi."
       - "What's up?"

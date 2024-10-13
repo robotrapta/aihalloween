@@ -18,7 +18,7 @@ fi
 poetry install
 
 poetry run python check-audio.py
-tmux new-session -d -s aihalloween "$SCRIPT_DIR/run.sh; bash"
+tmux new-session -d -s mainloop "$SCRIPT_DIR/run.sh; bash"
 tmux new-session -d -s psst "$SCRIPT_DIR/media/psst/soundloop.sh"
 # Launch the web server
 tmux new-session -d -s web "$SCRIPT_DIR/serve-status.sh"

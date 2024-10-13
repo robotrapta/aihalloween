@@ -55,10 +55,10 @@
 
         $(document).ready(function() {
             const images = [
-                { order: 1, src: "media/latest-triggered.jpg", alt: "Latest Triggered", title: "Latest Triggered" },
-                { order: 2, src: "media/latest-person.jpg", alt: "Latest Person", title: "Latest Person Detected" },
-                { order: 3, src: "media/latest-motion.jpg", alt: "Latest Motion", title: "Latest Motion Detected" },
-                { order: 4, src: "media/first-frame.jpg", alt: "First Frame", title: "System boot frame" }
+                { order: 1, filename: "latest-triggered", title: "Latest Event" },
+                { order: 2, filename: "latest-person", title: "Latest Person Detected" },
+                { order: 3, filename: "latest-motion", title: "Latest Motion Detected" },
+                { order: 4, filename: "first-frame", title: "System boot frame" }
             ];
 
             const imageTimestamps = []; // Array to store timestamps
@@ -67,33 +67,10 @@
                 return created ? dayjs(created).fromNow() : 'No timestamp available';
             }
 
-            function updateImageContainer(index, image, data) {
-                const relativeTime = getRelativeTime(data ? data.created : null);
-                const triggeredBy = (image.title === "Latest Triggered" && data) ? data.triggered_by : null;
-                const container = $(`#image-container-${index}`);
-
-                // Use the image's last updated timestamp for cache busting
-                const cacheBustedSrc = `${image.src}?timestamp=${data ? data.created : new Date().getTime()}`;
-
-                // Re-render the entire container if the timestamp has changed
-                const newContainerHTML = createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy);
-                if (container.length === 0) {
-                    // Create new container if it doesn't exist
-                    $('#gallery').append(newContainerHTML);
-                    console.log(`Created new container for image: ${image.src}`);
-                } else {
-                    // Replace the existing container with the new HTML
-                    container.replaceWith(newContainerHTML);
-                    console.log(`Re-rendered container for image: ${image.src}`);
-                }
-
-                imageTimestamps[index] = data ? data.created : null; // Store the timestamp
-            }
-
             function createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy) {
                 return `
                     <div class="image-container" id="image-container-${index}">
-                        <img src="${cacheBustedSrc}" alt="${image.alt}">
+                        <img src="${cacheBustedSrc}" alt="${image.title}">
                         <div class="image-title">${image.title}</div>
                         <div class="timestamp">Created: ${relativeTime}</div>
                         ${triggeredBy ? `<div class="triggered-by">Triggered by: ${triggeredBy}</div>` : ''}
@@ -101,10 +78,33 @@
                 `;
             }
 
+            function updateImageContainer(index, image, data) {
+                const relativeTime = getRelativeTime(data ? data.created : null);
+                const triggeredBy = (image.title === "Latest Event" && data) ? data.triggered_by : null;
+                const container = $(`#image-container-${index}`);
+
+                // Construct the full src path
+                const cacheBustedSrc = `media/${image.filename}.jpg?timestamp=${data ? data.created : new Date().getTime()}`;
+
+                // Re-render the entire container if the timestamp has changed
+                const newContainerHTML = createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy);
+                if (container.length === 0) {
+                    // Create new container if it doesn't exist
+                    $('#gallery').append(newContainerHTML);
+                    console.log(`Created new container for image: ${image.filename}`);
+                } else {
+                    // Replace the existing container with the new HTML
+                    container.replaceWith(newContainerHTML);
+                    console.log(`Re-rendered container for image: ${image.filename}`);
+                }
+
+                imageTimestamps[index] = data ? data.created : null; // Store the timestamp
+            }
+
             function updateImages() {
                 const requests = images.map((image, index) => {
-                    // Append a cache-busting query parameter to the JSON file URL
-                    const jsonFile = `${image.src.replace('.jpg', '.json')}?timestamp=${new Date().getTime()}`;
+                    // Construct the full JSON file path
+                    const jsonFile = `media/${image.filename}.json?timestamp=${new Date().getTime()}`;
                     return $.getJSON(jsonFile).then(
                         data => {
                             const currentTimestamp = imageTimestamps[index];
