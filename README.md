@@ -19,28 +19,43 @@ Last year if she got really riled up she'd blast you with a fog machine (DMX-con
 The behavior of Jacqueline is configured using a YAML file. Each detector is defined with a set of properties that determine what it reacts to and how it responds. Below is the format of the YAML configuration:
 
 ```
+base_volume: 400  # Turn up volume for everything to 400%
+
 detectors:
   - name: "doggie"
     query: "Detect dogs in the frame"
     soundfile_dir: "sounds/dogs"
+    volume: 60   # Turn down volume for dog noises.
 
   - name: "baby-stroller"
     query: "Detect baby strollers in the frame"
     soundfile_dir: "sounds/babies"
+    # No specific volume, uses base_volume
 
   - name: "taking-photo"
     query: "Detect people taking photos"
     messages:
       - "Say cheese!"
       - "My hashtag is A.I. Halloween"
+    volume: 200  # Turn up volume for taking voice
 ```
 
 ### YAML Fields
 
+System-wide:
+- **base_volume**: A global volume setting that scales the volume for all detectors. It is a 100-based scale, where "100" means normal volume, "150" means 1.5 times the normal volume, etc.
+- **motdet_pct**: The percentage threshold for motion detection sensitivity. This value is used to determine how much of the frame must change to trigger motion detection.
+- **motdet_val**: The value threshold for motion detection. This is used to determine the intensity of change required to trigger motion detection.
+- **resize_width**: The width to which frames are resized for processing. This helps in speeding up the processing by reducing the frame size.
+- **resize_height**: The height to which frames are resized for processing.
+
+
+Per-detector:
 - **name**: A descriptive name for the detector.
 - **query**: The query text used to identify the object or action in the frame.
-- **soundfile_dir**: The directory path where sound files related to the detector are stored.  If provided, Jacqueline will randomly choose one of the files in the directory to play when the detector is triggered.
-- **messages**: A list of messages that Jacqueline can say when the detector is triggered.  These will be rendered as a voice.  Messages are only used if there is no `soundfile_dir`.
+- **soundfile_dir**: The directory path where sound files related to the detector are stored. If provided, Jacqueline will randomly choose one of the files in the directory to play when the detector is triggered.
+- **messages**: A list of messages that Jacqueline can say when the detector is triggered. These will be rendered as a voice. Messages are only used if there is no `soundfile_dir`.
+- **volume**: (Optional) A specific volume setting for the detector, which multiplies on top of the `base_volume`. It is also a 100-based scale.
 
 ## System Setup
 

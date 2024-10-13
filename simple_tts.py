@@ -19,4 +19,5 @@ def make_mp3_text(text:str) -> str:
     return fn
 
 def play_mp3(fn: str, volume: int = 100) -> None:
-    os.system(f"ffplay -autoexit -nodisp -volume {volume} {fn}")
+    # Use the -af option to apply a volume filter
+    os.system(f"ffplay -autoexit -nodisp -af 'volume={volume/100.0}' {fn}")

@@ -14,7 +14,7 @@ from timebudget import timebudget
 
 
 # Framegrab bug makes me initialize logging before it's imported
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(process)d %(levelname)s - %(message)s')
 
 from PIL import Image
 from framegrab import FrameGrabber, MotionDetector
@@ -124,13 +124,15 @@ class Config:
 
 def load_detectors_from_yaml(config: Config) -> list[HalloweenDetector]:
     detectors = []
+    base_volume = config.config.get('base_volume', 100)  # Get base_volume from config
     for detector_config in config.get_detectors():
+        volume = base_volume * (detector_config.get('volume', 100) / 100)
         detector = HalloweenDetector(
             query_name=detector_config['name'],
             query_text=detector_config['query'],
             messages=detector_config.get('messages', []),
             soundfile_dir=detector_config.get('soundfile_dir', ""),
-            volume=detector_config.get('volume', 100),
+            volume=volume,
         )
         logger.info(f"Created {detector}")
         detectors.append(detector)
@@ -151,7 +153,11 @@ def mainloop(config_file: str):
 
     detectors = load_detectors_from_yaml(config)
     # A special non-configurable detector that looks for people.
-    any_people = HalloweenDetector("any-people", "Are there any people on the sidewalk?")
+    any_people = HalloweenDetector(
+        "any-people", 
+        "Are there any people on the sidewalk?", 
+        volume=config.config.get('base_volume', 100)  # Use base_volume directly for this detector
+    )
 
     fps_display = FpsDisplay(catch_exceptions=True)
 
