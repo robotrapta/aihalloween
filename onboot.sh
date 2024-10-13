@@ -13,10 +13,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ -n "$REINSTALL" ]; then
-    git pull origin main
-    poetry install
-fi
+#git pull origin main
+# For some reason I need to do this on boot.  No idea why.
+poetry install
 
 poetry run python check-audio.py
 tmux new-session -d -s aihalloween "$SCRIPT_DIR/run.sh; bash"
