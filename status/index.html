@@ -72,7 +72,7 @@
                     <div class="image-container" id="image-container-${index}">
                         <img src="${cacheBustedSrc}" alt="${image.title}">
                         <div class="image-title">${image.title}</div>
-                        <div class="timestamp">Created: ${relativeTime}</div>
+                        <div class="timestamp">Happened ${relativeTime}</div>
                         ${triggeredBy ? `<div class="triggered-by">Triggered by: ${triggeredBy}</div>` : ''}
                     </div>
                 `;
@@ -113,7 +113,7 @@
                             } else {
                                 // Update only the relative time if the timestamp hasn't changed
                                 const relativeTime = getRelativeTime(data.created);
-                                $(`#image-container-${index} .timestamp`).text(`Created: ${relativeTime}`);
+                                $(`#image-container-${index} .timestamp`).text(`Happened ${relativeTime}`);
                             }
                         },
                         () => updateImageContainer(index, image, null)
