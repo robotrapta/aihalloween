@@ -39,7 +39,8 @@ class HalloweenDetector():
                  query_text: str, 
                  trigger_callback: callable = None, 
                  messages: list[str] = None, 
-                 soundfile_dir: str = ""):
+                 soundfile_dir: str = "",
+                 volume: int = 100):
         if messages and soundfile_dir:
             raise ValueError(f"Error in configuration for detector {query_name}: Cannot configure both 'messages' and 'soundfile_dir'. Please choose one.")
         self.gl = Groundlight()
@@ -50,12 +51,9 @@ class HalloweenDetector():
         )
         logger.info(f"Using detector {self.detector}")
         self.trigger_callback = trigger_callback
-        if not messages:
-            self.tts_choices = []
-        else:
-            self.tts_choices = messages
+        self.tts_choices = messages if messages else []
         self.soundfile_dir = soundfile_dir
-
+        self.volume = volume
 
     def tts_trigger(self):
         text_choices = self.tts_choices
@@ -65,13 +63,13 @@ class HalloweenDetector():
         chosen_text = random.choice(text_choices)
         logger.info(f"TTS speaking: '{chosen_text}'. Triggered by {self.detector.name}")
         audiofile = make_mp3_text(chosen_text)
-        play_mp3(audiofile)
+        play_mp3(audiofile, volume=self.volume)
 
-    def pick_and_play_soundfile(self, soundfile_dir:str):
+    def pick_and_play_soundfile(self, soundfile_dir: str):
         soundfiles = [f for f in os.listdir(soundfile_dir) if f.endswith('.mp3')]
         soundfile = os.path.join(soundfile_dir, random.choice(soundfiles))
         logger.info(f"Playing {soundfile}")
-        play_mp3(soundfile)
+        play_mp3(soundfile, volume=self.volume)
 
     def do_trigger(self):
         if self.trigger_callback:
@@ -131,7 +129,8 @@ def load_detectors_from_yaml(config: Config) -> list[HalloweenDetector]:
             query_name=detector_config['name'],
             query_text=detector_config['query'],
             messages=detector_config.get('messages', []),
-            soundfile_dir=detector_config.get('soundfile_dir', "")
+            soundfile_dir=detector_config.get('soundfile_dir', ""),
+            volume=detector_config.get('volume', 100),
         )
         logger.info(f"Created {detector}")
         detectors.append(detector)

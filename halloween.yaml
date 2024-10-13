@@ -2,14 +2,19 @@ motdet_pct: 1.5
 motdet_val: 50
 resize_width: 800
 resize_height: 600
+default_volume: 200
 
 detectors:
   - name: "doggie"
     query: "Can you see a dog?"
     soundfile_dir: "media/dog"
+    volume: 300
+
   - name: "baby-stroller"
     query: "Is there a baby stroller in view?"
     soundfile_dir: "media/baby"
+    volume: 400
+
   - name: "taking-photo"
     query: "Is someone holding a camera or cellphone towards the camera?"
     messages:

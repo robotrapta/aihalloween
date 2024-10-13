@@ -18,5 +18,5 @@ def make_mp3_text(text:str) -> str:
     tts.save(fn)
     return fn
 
-def play_mp3(fn:str) -> None:
-    os.system(f"ffplay -autoexit -nodisp {fn}")
+def play_mp3(fn: str, volume: int = 100) -> None:
+    os.system(f"ffplay -autoexit -nodisp -volume {volume} {fn}")
