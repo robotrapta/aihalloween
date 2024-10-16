@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import random
+import signal
 import sys
 import time
 import yaml
@@ -234,9 +235,21 @@ def mainloop(config_file: str):
                             logger.info(f"Final {detector.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
                             os._exit(0)
 
-# ... existing code ...
+def reap_children(signum, frame):
+    """Reap child processes to prevent zombies."""
+    while True:
+        try:
+            # Wait for any child process to terminate
+            pid, _ = os.waitpid(-1, os.WNOHANG)
+            if pid == 0:
+                break
+            logger.debug(f"Reaped child process with PID: {pid}")
+        except ChildProcessError:
+            break
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGCHLD, reap_children)
+
     if len(sys.argv) > 1:
         config_file = sys.argv[1]
     else:
