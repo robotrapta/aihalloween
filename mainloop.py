@@ -119,7 +119,7 @@ class HalloweenDetector():
         else:
             self.tts_trigger()
 
-    def process_image(self, frame: np.ndarray) -> bool:
+    def process_image(self, frame: bytes | np.ndarray) -> bool:
         start_time = time.monotonic()
         iq = self.gl.ask_ml(self.detector, frame)
         elased = time.monotonic() - start_time
@@ -178,6 +178,18 @@ def load_detectors_from_yaml(config: Config) -> list[HalloweenDetector]:
         detectors.append(detector)
     return detectors
 
+def process_detector(detector: HalloweenDetector, jpeg_bytes: bytes, grab_time: float):
+    if detector.process_image(jpeg_bytes):
+        answer = "YES"
+        md = {
+            "triggered_by": detector.name,
+        }
+        save_jpeg(f"latest-triggered-{detector.name}", jpeg_bytes, metadata=md)
+        save_jpeg("latest-triggered", jpeg_bytes, metadata=md)
+    else:
+        answer = "NO"
+    logger.info(f"Final {detector.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
+
 def mainloop(config_file: str):
     logger.info(f"Loading configuration from {config_file}")
     config = Config(config_file)
@@ -223,17 +235,11 @@ def mainloop(config_file: str):
                             # Using os.fork here is a blunt hammer, but effective.
                             # We're getting some HTTP errors I think from this.  But the sub-processes just die.
                             # So it lowers recall, but doesn't break the system.
-                            if detector.process_image(jpeg_bytes):
-                                answer = "YES"
-                                md = {
-                                    "triggered_by": detector.name,
-                                }
-                                save_jpeg(f"latest-triggered-{detector.name}", jpeg_bytes, metadata=md)
-                                save_jpeg("latest-triggered", jpeg_bytes, metadata=md)
-                            else:
-                                answer = "NO"
-                            logger.info(f"Final {detector.name} {answer} grab_latency={time.monotonic() - grab_time:.2f}s")
-                            os._exit(0)
+                            try:
+                                process_detector(detector, jpeg_bytes, grab_time)
+                            finally:
+                                # Don't leak the child process back into the main loop
+                                os._exit(0)
 
 def reap_children(signum, frame):
     """Reap child processes to prevent zombies."""
@@ -243,7 +249,7 @@ def reap_children(signum, frame):
             pid, _ = os.waitpid(-1, os.WNOHANG)
             if pid == 0:
                 break
-            logger.debug(f"Reaped child process with PID: {pid}")
+            logger.debug(f"Reaped child process with PID: {pid} status={status}")
         except ChildProcessError:
             break
 
