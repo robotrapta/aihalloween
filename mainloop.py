@@ -246,7 +246,7 @@ def reap_children(signum, frame):
     while True:
         try:
             # Wait for any child process to terminate
-            pid, _ = os.waitpid(-1, os.WNOHANG)
+            pid, status = os.waitpid(-1, os.WNOHANG)
             if pid == 0:
                 break
             logger.debug(f"Reaped child process with PID: {pid} status={status}")
