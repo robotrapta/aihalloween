@@ -1,5 +1,9 @@
-import time
+from pathlib import Path
+import datetime
+import json
 import logging
+import os
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +17,14 @@ class FpsDisplay:
                 process_image(img)
     """
 
-    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0, catch_exceptions:bool=False):
+    def __init__(self, ema_alpha:float=0.1, display_every_secs:float=1.0, catch_exceptions:bool=False, status_file:Path=None):
         self.last_msg_time = time.monotonic()
         self.ema_fps = 0
         self.ema_alpha = ema_alpha
         self.display_every_secs = display_every_secs
         self.catch_exceptions = catch_exceptions
         self.exception_delay = 5.0
+        self.status_file = status_file
 
     def __enter__(self):
         self.start_time = time.monotonic()
@@ -47,3 +52,10 @@ class FpsDisplay:
         if time.monotonic() - self.last_msg_time >= self.display_every_secs:
             logger.info(f"average recent fps={self.ema_fps:.2f}")
             self.last_msg_time = time.monotonic()
+            if self.status_file:
+                doc = {
+                    "fps": self.ema_fps,
+                    "timestamp": datetime.datetime.now().isoformat(),
+                    "pid": os.getpid(),
+                }
+                self.status_file.write_text(json.dumps(doc))

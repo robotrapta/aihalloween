@@ -46,12 +46,38 @@
             font-size: 0.9em;
             color: #ccc;
         }
+        #fps-section {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 8px;
+            color: #fff;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
     <script>
         dayjs.extend(dayjs_plugin_relativeTime);
+
+        function getRelativeTime(created) {
+            return created ? dayjs(created).fromNow() : 'No timestamp available';
+        }
+
+        function updateFPS() {
+            const fpsFile = 'media/fps.json?timestamp=' + new Date().getTime();
+            $.getJSON(fpsFile, function(data) {
+                const relativeTime = getRelativeTime(data.timestamp);
+                const roundedFPS = data.fps.toFixed(2); // Round FPS to two decimal places
+                $('#fps-section').html(`
+                    Current FPS: ${roundedFPS}<br>
+                    Last activity reported: ${relativeTime}<br>
+                    PID: ${data.pid}
+                `);
+            }).fail(function() {
+                $('#fps-section').text('Failed to load FPS data.');
+            });
+        }
 
         $(document).ready(function() {
             const images = [
@@ -62,10 +88,6 @@
             ];
 
             const imageTimestamps = []; // Array to store timestamps
-
-            function getRelativeTime(created) {
-                return created ? dayjs(created).fromNow() : 'No timestamp available';
-            }
 
             function createImageContainerHTML(index, image, cacheBustedSrc, relativeTime, triggeredBy) {
                 return `
@@ -132,6 +154,12 @@
 
             // Set interval to update images every 2 seconds
             setInterval(updateImages, 2000);
+
+            // Initial load of FPS data
+            updateFPS();
+
+            // Set interval to update FPS every 15 seconds
+            setInterval(updateFPS, 15000);
         });
     </script>
 </head>
@@ -139,6 +167,10 @@
     <h1>AI Halloween</h1>
     <div id="gallery">
         <!-- Image containers will be dynamically added here by jQuery -->
+    </div>
+
+    <div id="fps-section">
+        <!-- FPS data will be dynamically added here by jQuery -->
     </div>
 
     <div id="explanation">

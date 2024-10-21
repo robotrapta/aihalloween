@@ -211,7 +211,7 @@ def mainloop(config_file: str):
         volume=config.config.get('base_volume', 100)  # Use base_volume directly for this detector
     )
 
-    fps_display = FpsDisplay(catch_exceptions=True)
+    fps_display = FpsDisplay(catch_exceptions=True, status_file=Path("status/media/fps.json"))
 
     while True:
         with fps_display:  # prints fps once per second
