@@ -60,6 +60,10 @@
     <script>
         dayjs.extend(dayjs_plugin_relativeTime);
 
+        function getAbsoluteTime(created) {
+            return created ? dayjs(created).format('YYYY-MM-DD HH:mm:ss') : 'No timestamp available';
+        }
+
         function getRelativeTime(created) {
             return created ? dayjs(created).fromNow() : 'No timestamp available';
         }
@@ -67,11 +71,11 @@
         function updateFPS() {
             const fpsFile = 'media/fps.json?timestamp=' + new Date().getTime();
             $.getJSON(fpsFile, function(data) {
-                const relativeTime = getRelativeTime(data.timestamp);
+                const absoluteTime = getAbsoluteTime(data.timestamp);
                 const roundedFPS = data.fps.toFixed(2); // Round FPS to two decimal places
                 $('#fps-section').html(`
                     Current FPS: ${roundedFPS}<br>
-                    Last activity reported: ${relativeTime}<br>
+                    Last activity reported: ${absoluteTime}<br>
                     PID: ${data.pid}
                 `);
             }).fail(function() {
@@ -158,8 +162,8 @@
             // Initial load of FPS data
             updateFPS();
 
-            // Set interval to update FPS every 15 seconds
-            setInterval(updateFPS, 15000);
+            // Set interval to update FPS every second
+            setInterval(updateFPS, 1000);
         });
     </script>
 </head>
